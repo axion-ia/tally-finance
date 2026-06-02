@@ -211,7 +211,7 @@ const firebaseConfig = {apiKey:"AIzaSyBbE4c5VA08a2F3jF0nVDivSgCtIeCuqKg",authDom
 const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getFirestore(app);
-const ADMIN='doug.alveslisboa.gmail.com';
+const ADMIN='doug.alveslisboa@gmail.com';
 window.sair=()=>signOut(auth).then(()=>window.location.href='index.html');
 onAuthStateChanged(auth,user=>{
   if(!user){window.location.href='index.html';return;}
@@ -249,7 +249,7 @@ function filtrar(){
     return true;
   });
 }
-function render(){
+window.render=function(){
   var l=filtrar();var tb=document.getElementById('tbl');var em=document.getElementById('empty');
   document.getElementById('cnt').textContent=l.length+' fornecedor'+(l.length!==1?'es':'');
   if(!l.length){tb.innerHTML='';em.style.display='';return;}
@@ -275,7 +275,7 @@ function stats(){
   document.getElementById('s-at').textContent=forn.filter(function(f){return f.ativo!==false;}).length;
   document.getElementById('s-ab').textContent=forn.filter(function(f){return abertos(f.nome).length>0;}).length;
 }
-function openDrawer(id){
+window.openDrawer=function(id){
   editId=id;var f=id?forn.find(function(x){return x.id===id;})||{}:{};
   document.getElementById('dt').textContent=id?'Editar Fornecedor':'Novo Fornecedor';
   document.getElementById('db').innerHTML=
@@ -305,8 +305,8 @@ function openDrawer(id){
   document.getElementById('drawer').classList.add('open');
   setTimeout(function(){document.getElementById('fn').focus();},300);
 }
-function closeDrawer(){document.getElementById('ov').classList.remove('open');document.getElementById('drawer').classList.remove('open');editId=null;}
-async function saveForn(){
+window.closeDrawer=function(){document.getElementById('ov').classList.remove('open');document.getElementById('drawer').classList.remove('open');editId=null;}
+window.saveForn=async function(){
   var n=document.getElementById('fn').value.trim();
   if(!n){document.getElementById('fn').style.borderColor='var(--red)';toast('Informe o nome.',true);return;}
   document.getElementById('fn').style.borderColor='';
@@ -315,14 +315,14 @@ async function saveForn(){
   else{d.ativo=true;var ref=await addDoc(collection(db,'fornecedores'),d);forn.unshift(Object.assign({id:ref.id},d));toast('Fornecedor cadastrado.');}
   closeDrawer();render();stats();
 }
-async function togAtivo(id){var f=forn.find(function(x){return x.id===id;});f.ativo=f.ativo===false;await updateDoc(doc(db,'fornecedores',id),{ativo:f.ativo});render();stats();toast(f.ativo?'Fornecedor ativado.':'Fornecedor inativado.');}
-function askDel(id){
+window.togAtivo=async function(id){var f=forn.find(function(x){return x.id===id;});f.ativo=f.ativo===false;await updateDoc(doc(db,'fornecedores',id),{ativo:f.ativo});render();stats();toast(f.ativo?'Fornecedor ativado.':'Fornecedor inativado.');}
+window.askDel=function(id){
   delId=id;var f=forn.find(function(x){return x.id===id;});var ab=abertos(f.nome);
   document.getElementById('mdel-msg').textContent=ab.length>0?'"'+f.nome+'" possui '+ab.length+' conta(s) em aberto.':'"'+f.nome+'" será excluído permanentemente.';
   document.getElementById('mdel').classList.add('open');
 }
-function fModal(){document.getElementById('mdel').classList.remove('open');delId=null;}
-async function confDel(){var n=forn.find(function(f){return f.id===delId;})?.nome||'';await deleteDoc(doc(db,'fornecedores',delId));forn=forn.filter(function(f){return f.id!==delId;});render();stats();fModal();toast('Fornecedor "'+n+'" excluído.');}
+window.fModal=function(){document.getElementById('mdel').classList.remove('open');delId=null;}
+window.confDel=async function(){var n=forn.find(function(f){return f.id===delId;})?.nome||'';await deleteDoc(doc(db,'fornecedores',delId));forn=forn.filter(function(f){return f.id!==delId;});render();stats();fModal();toast('Fornecedor "'+n+'" excluído.');}
 function toast(msg,e){var t=document.getElementById('toast');t.textContent=msg;t.className='show'+(e?' err':'');clearTimeout(t._t);t._t=setTimeout(function(){t.className='';},2800);}
 document.getElementById('mdel').addEventListener('click',function(e){if(e.target===this)fModal();});
 load();
