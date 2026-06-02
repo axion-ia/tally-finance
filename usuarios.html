@@ -172,8 +172,8 @@ async function load(){
     const ativo=u.ativo!==false;
     const statusBdg=`<span class="bdg ${ativo?'bdg-s':'bdg-d'}">${ativo?'Ativo':'Inativo'}</span>`;
     const acoes=u.email!==ADMIN?`
-      <button class="btn-i" title="${ativo?'Desativar':'Ativar'}" onclick="toggleAtivo('${d.id}','${u.nome||u.email}',${ativo})">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M18.36 6.64a9 9 0 11-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+      <button class="btn-i" style="color:var(--red)" title="Excluir" onclick="excluirUsuario('${d.id}','${u.nome||u.email}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
       </button>`:''
     return `<tr><td>${u.nome||'—'}</td><td>${u.email}</td><td><span class="bdg ${u.role==='admin'?'bdg-s':'bdg-i'}">${u.role==='admin'?'Admin':'Usuário'}</span></td><td>${statusBdg}</td><td>${dt}</td><td><div class="acts">${acoes}</div></td></tr>`;
   }).join('');
@@ -207,11 +207,10 @@ window.criarUsuario=async()=>{
   }finally{btn.disabled=false;btn.textContent='Criar Usuário';}
 };
 
-window.toggleAtivo=async(uid,nome,ativo)=>{
-  const acao=ativo?'desativar':'ativar';
-  if(!confirm(`Deseja ${acao} o usuário "${nome}"?`))return;
-  await updateDoc(doc(db,'users',uid),{ativo:!ativo});
-  toast(`Usuário ${nome} ${ativo?'desativado':'ativado'}.`);
+window.excluirUsuario=async(uid,nome)=>{
+  if(!confirm('Excluir o usuário "'+nome+'"? O acesso será removido do sistema.'))return;
+  await deleteDoc(doc(db,'users',uid));
+  toast('Usuário "'+nome+'" excluído.');
   await load();
 };
 
