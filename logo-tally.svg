@@ -1,11 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="480" viewBox="0 0 480 160" role="img">
 <title>Tally Gestão Financeira</title>
-<desc>Logo Tally com ícone de barras crescentes e seta dourada</desc>
 
-<!-- Barras crescentes -->
-<rect x="28" y="50" width="16" height="32" rx="2" fill="#1a3a2a"/>
-<rect x="50" y="34" width="16" height="48" rx="2" fill="#1a3a2a"/>
-<rect x="72" y="14" width="16" height="68" rx="2" fill="#1a3a2a"/>
+<!-- Barras crescentes brancas -->
+<rect x="28" y="50" width="16" height="32" rx="2" fill="#fff"/>
+<rect x="50" y="34" width="16" height="48" rx="2" fill="#fff"/>
+<rect x="72" y="14" width="16" height="68" rx="2" fill="#fff"/>
 
 <!-- Seta diagonal dourada -->
 <line x1="32" y1="80" x2="88" y2="8" stroke="#b8963e" stroke-width="3" stroke-linecap="round"/>
@@ -14,12 +13,12 @@
 <!-- Arco dourado -->
 <path d="M18 82 Q40 112 88 90" fill="none" stroke="#b8963e" stroke-width="2.5" stroke-linecap="round"/>
 
-<!-- Nome Tally -->
-<text x="114" y="80" font-family="'IBM Plex Mono', monospace" font-size="58" font-weight="600" fill="#1a3a2a" letter-spacing="-2">Tally</text>
+<!-- Nome Tally branco -->
+<text x="114" y="80" font-family="'IBM Plex Mono', monospace" font-size="58" font-weight="600" fill="#ffffff" letter-spacing="-2">Tally</text>
 
 <!-- Linha + subtítulo + linha -->
 <line x1="28" y1="104" x2="48" y2="104" stroke="#b8963e" stroke-width="1.5"/>
-<text x="54" y="109" font-family="'IBM Plex Mono', monospace" font-size="12" font-weight="400" fill="#6b6560" letter-spacing="3">GESTÃO FINANCEIRA</text>
+<text x="54" y="109" font-family="'IBM Plex Mono', monospace" font-size="12" font-weight="400" fill="rgba(255,255,255,0.55)" letter-spacing="3">GESTÃO FINANCEIRA</text>
 <line x1="242" y1="104" x2="262" y2="104" stroke="#b8963e" stroke-width="1.5"/>
 
 </svg>
