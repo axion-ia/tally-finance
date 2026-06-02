@@ -192,13 +192,13 @@ window.criarUsuario=async()=>{
   if(senha.length<6){err.textContent='Senha deve ter no mínimo 6 caracteres.';err.classList.add('show');return;}
   const btn=document.getElementById('btn-criar');btn.disabled=true;btn.textContent='Criando...';err.classList.remove('show');
   try{
-    // App secundário para não deslogar o admin
-    const secondApp=initializeApp(firebaseConfig,'secondary-'+Date.now());
-    const secondAuth=getAuth(secondApp);
-    const cred=await createUserWithEmailAndPassword(secondAuth,email,senha);
+    const cred=await createUserWithEmailAndPassword(auth,email,senha);
     await setDoc(doc(db,'users',cred.user.uid),{email,nome,role,primeiroAcesso:true,ativo:true,createdAt:new Date().toISOString()});
-    await signOut(secondAuth);
-    fecharModal();toast('Usuário '+nome+' criado! Login: '+email);await load();
+    fecharModal();
+    toast('Usuário '+nome+' criado! Você precisará fazer login novamente.');
+    await load();
+    // Reloga o admin
+    setTimeout(()=>signOut(auth).then(()=>window.location.href='index.html'),2000);
   }catch(e){
     let msg='Erro ao criar usuário.';
     if(e.code==='auth/email-already-in-use')msg='E-mail já cadastrado.';
