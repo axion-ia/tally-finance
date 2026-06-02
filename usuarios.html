@@ -132,9 +132,9 @@ tbody tr:hover{background:#fafaf7}
 <div id="toast"></div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, doc, setDoc, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {apiKey:"AIzaSyBbE4c5VA08a2F3jF0nVDivSgCtIeCuqKg",authDomain:"tally-finance.firebaseapp.com",projectId:"tally-finance",storageBucket:"tally-finance.firebasestorage.app",messagingSenderId:"118325290738",appId:"1:118325290738:web:0d30137db3b6ea58e8d26b"};
 const app=initializeApp(firebaseConfig);
@@ -192,8 +192,16 @@ window.criarUsuario=async()=>{
   if(senha.length<6){err.textContent='Senha deve ter no mínimo 6 caracteres.';err.classList.add('show');return;}
   const btn=document.getElementById('btn-criar');btn.disabled=true;btn.textContent='Criando...';err.classList.remove('show');
   try{
-    const cred=await createUserWithEmailAndPassword(auth,email,senha);
-    await setDoc(doc(db,'users',cred.user.uid),{email,nome,role,primeiroAcesso:true,ativo:true,createdAt:new Date().toISOString()});
+    // Usa app secundário para não deslogar o admin
+    const appName='tally-secondary';
+    const existingApp=getApps().find(a=>a.name===appName);
+    const secondApp=existingApp||initializeApp(firebaseConfig,appName);
+    const secondAuth=getAuth(secondApp);
+    const cred=await createUserWithEmailAndPassword(secondAuth,email,senha);
+    const newUid=cred.user.uid;
+    await signOut(secondAuth);
+    // Salva no Firestore com o UID correto
+    await setDoc(doc(db,'users',newUid),{email,nome,role,primeiroAcesso:true,ativo:true,createdAt:new Date().toISOString()});
     fecharModal();toast('Usuário '+nome+' criado! Login: '+email);await load();
   }catch(e){
     let msg='Erro ao criar usuário.';
