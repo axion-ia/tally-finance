@@ -7,48 +7,196 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#f5f3ef;--sf:#fff;--bd:#ddd9d2;--tx:#1a1814;--tx2:#6b6560;--tx3:#a09a93;--green:#1a3a2a;--green2:#2d5e42;--red:#8b2020;--mono:'IBM Plex Mono',monospace}
-body{background:var(--bg);font-family:var(--mono);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.box{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:40px 36px;width:100%;max-width:380px;box-shadow:0 4px 24px rgba(0,0,0,.06)}
-.logo{margin-bottom:2rem}
-.logo-name{font-size:26px;font-weight:600;color:var(--green);letter-spacing:-0.03em}
-.logo-sub{font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:0.06em;margin-top:4px}
-h2{font-size:16px;font-weight:600;margin-bottom:6px}
-.sub{font-size:12px;color:var(--tx3);margin-bottom:28px}
-.fg{margin-bottom:14px}
-.fg label{display:block;font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px}
-.fg input{width:100%;padding:10px 14px;border:1px solid var(--bd);border-radius:6px;font-family:var(--mono);font-size:13px;color:var(--tx);background:#f8f6f2;outline:none;transition:border-color .15s}
+:root{--green:#1a3a2a;--green2:#2d5e42;--green3:#0f2318;--gold:#b8963e;--bg:#f5f3ef;--sf:#fff;--bd:#ddd9d2;--tx:#1a1814;--tx2:#6b6560;--tx3:#a09a93;--red:#8b2020;--mono:'IBM Plex Mono',monospace}
+body{font-family:var(--mono);min-height:100vh;display:flex;background:var(--bg)}
+
+/* ── Lado esquerdo ── */
+.left{width:55%;background:var(--green);position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:3rem}
+.left-bg{position:absolute;inset:0;background:linear-gradient(135deg,var(--green3) 0%,var(--green) 50%,var(--green2) 100%)}
+
+/* Grade de pontos */
+.left-dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.08) 1px,transparent 1px);background-size:32px 32px}
+
+/* Ícones flutuantes */
+.icon-float{position:absolute;display:flex;align-items:center;justify-content:center;border-radius:16px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(4px);animation:float linear infinite}
+@keyframes float{0%{transform:translateY(0px) rotate(0deg)}50%{transform:translateY(-12px) rotate(2deg)}100%{transform:translateY(0px) rotate(0deg)}}
+
+/* Texto bottom-left */
+.left-content{position:relative;z-index:2}
+.left-tag{font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
+.left-title{font-size:32px;font-weight:600;color:#fff;line-height:1.2;letter-spacing:-.02em;margin-bottom:12px}
+.left-sub{font-size:13px;color:rgba(255,255,255,.5);line-height:1.6;max-width:320px}
+.left-pills{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap}
+.pill{font-size:11px;padding:5px 12px;border-radius:99px;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6)}
+
+/* ── Lado direito ── */
+.right{width:45%;display:flex;align-items:center;justify-content:center;padding:3rem 2.5rem;background:var(--bg)}
+.box{width:100%;max-width:380px}
+.logo{margin-bottom:2.5rem}
+.logo img{width:200px;display:block}
+h2{font-size:18px;font-weight:600;color:var(--tx);margin-bottom:6px}
+.sub{font-size:13px;color:var(--tx3);margin-bottom:28px;line-height:1.5}
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.inp-wrap{position:relative}
+.fg input{width:100%;padding:11px 14px;border:1px solid var(--bd);border-radius:8px;font-family:var(--mono);font-size:13px;color:var(--tx);background:var(--sf);outline:none;transition:border-color .15s;height:42px}
 .fg input:focus{border-color:var(--green2);background:#fff}
 .fg input::placeholder{color:var(--tx3)}
-.btn{width:100%;padding:12px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--mono);background:var(--green);color:#fff;margin-top:8px;transition:background .15s}
+.eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--tx3);padding:4px;display:flex;align-items:center;transition:color .15s}
+.eye-btn:hover{color:var(--tx)}
+.forgot{display:block;text-align:right;font-size:12px;color:var(--green2);text-decoration:none;margin-top:-8px;margin-bottom:20px}
+.forgot:hover{text-decoration:underline}
+.btn{width:100%;padding:13px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--mono);background:var(--green);color:#fff;transition:background .15s;letter-spacing:.02em}
 .btn:hover{background:var(--green2)}
 .btn:disabled{opacity:.6;cursor:not-allowed}
-.errmsg{display:none;background:#fdf0f0;color:var(--red);font-size:12px;padding:10px 14px;border-radius:6px;margin-top:12px;text-align:center;border:1px solid rgba(139,32,32,.15)}
+.errmsg{display:none;background:#fdf0f0;color:var(--red);font-size:12px;padding:10px 14px;border-radius:8px;margin-top:12px;text-align:center;border:1px solid rgba(139,32,32,.15)}
 .errmsg.show{display:block}
 .footer{text-align:center;margin-top:24px;font-size:11px;color:var(--tx3)}
 .spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* Responsivo */
+@media(max-width:768px){.left{display:none}.right{width:100%}}
 </style>
 </head>
 <body>
-<div class="box">
-  <div class="logo">
-    <div class="logo-name">Tally</div>
-    <div class="logo-sub">Controle Financeiro</div>
+
+<!-- Lado esquerdo -->
+<div class="left">
+  <div class="left-bg"></div>
+  <div class="left-dots"></div>
+
+  <!-- Ícones flutuantes -->
+  <!-- Gráfico de barras -->
+  <div class="icon-float" style="width:80px;height:80px;top:8%;left:12%;animation-duration:6s;animation-delay:0s">
+    <svg viewBox="0 0 40 40" fill="none" width="40" height="40">
+      <rect x="4" y="20" width="8" height="16" rx="2" fill="rgba(255,255,255,.6)"/>
+      <rect x="16" y="12" width="8" height="24" rx="2" fill="rgba(255,255,255,.8)"/>
+      <rect x="28" y="6" width="8" height="30" rx="2" fill="#b8963e"/>
+    </svg>
   </div>
-  <h2>Bem-vindo</h2>
-  <p class="sub">Entre com suas credenciais para acessar.</p>
-  <div class="fg">
-    <label>E-mail</label>
-    <input id="email" type="email" placeholder="seu@email.com" autocomplete="email"/>
+
+  <!-- Cifrão -->
+  <div class="icon-float" style="width:100px;height:100px;top:6%;left:55%;animation-duration:7s;animation-delay:1s">
+    <svg viewBox="0 0 48 48" fill="none" width="48" height="48">
+      <circle cx="24" cy="24" r="20" stroke="rgba(255,255,255,.3)" stroke-width="2"/>
+      <text x="24" y="32" text-anchor="middle" font-size="22" font-weight="600" fill="#b8963e" font-family="monospace">$</text>
+    </svg>
   </div>
-  <div class="fg">
-    <label>Senha</label>
-    <input id="senha" type="password" placeholder="••••••••" autocomplete="current-password"/>
+
+  <!-- Seta crescimento -->
+  <div class="icon-float" style="width:90px;height:90px;top:22%;left:72%;animation-duration:8s;animation-delay:2s">
+    <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
+      <polyline points="4,36 14,24 22,28 38,8" stroke="rgba(255,255,255,.7)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <polyline points="30,8 38,8 38,16" stroke="rgba(255,255,255,.7)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
   </div>
-  <button class="btn" id="btn-entrar" onclick="entrar()">Entrar</button>
-  <div class="errmsg" id="err"></div>
-  <div class="footer">Tally · Uso Privado</div>
+
+  <!-- Porcentagem -->
+  <div class="icon-float" style="width:70px;height:70px;top:38%;left:8%;animation-duration:5.5s;animation-delay:.5s">
+    <svg viewBox="0 0 36 36" fill="none" width="36" height="36">
+      <text x="18" y="26" text-anchor="middle" font-size="20" font-weight="600" fill="rgba(255,255,255,.7)" font-family="monospace">%</text>
+    </svg>
+  </div>
+
+  <!-- Calculadora -->
+  <div class="icon-float" style="width:85px;height:85px;top:35%;left:62%;animation-duration:7.5s;animation-delay:1.5s">
+    <svg viewBox="0 0 44 44" fill="none" width="40" height="40">
+      <rect x="8" y="4" width="28" height="36" rx="4" stroke="rgba(255,255,255,.5)" stroke-width="2"/>
+      <rect x="12" y="8" width="20" height="10" rx="2" fill="rgba(255,255,255,.3)"/>
+      <circle cx="14" cy="26" r="2" fill="rgba(255,255,255,.6)"/>
+      <circle cx="22" cy="26" r="2" fill="rgba(255,255,255,.6)"/>
+      <circle cx="30" cy="26" r="2" fill="#b8963e"/>
+      <circle cx="14" cy="34" r="2" fill="rgba(255,255,255,.6)"/>
+      <circle cx="22" cy="34" r="2" fill="rgba(255,255,255,.6)"/>
+      <circle cx="30" cy="34" r="2" fill="rgba(255,255,255,.6)"/>
+    </svg>
+  </div>
+
+  <!-- Cofre/Piggy -->
+  <div class="icon-float" style="width:75px;height:75px;top:55%;left:18%;animation-duration:6.5s;animation-delay:2.5s">
+    <svg viewBox="0 0 40 40" fill="none" width="38" height="38">
+      <ellipse cx="20" cy="22" rx="14" ry="12" stroke="rgba(255,255,255,.5)" stroke-width="2"/>
+      <circle cx="26" cy="18" r="2" fill="rgba(255,255,255,.7)"/>
+      <line x1="14" y1="34" x2="12" y2="40" stroke="rgba(255,255,255,.4)" stroke-width="2" stroke-linecap="round"/>
+      <line x1="20" y1="35" x2="20" y2="40" stroke="rgba(255,255,255,.4)" stroke-width="2" stroke-linecap="round"/>
+      <line x1="26" y1="34" x2="28" y2="40" stroke="rgba(255,255,255,.4)" stroke-width="2" stroke-linecap="round"/>
+      <rect x="17" y="10" width="6" height="3" rx="1" fill="#b8963e"/>
+    </svg>
+  </div>
+
+  <!-- Documento/Nota -->
+  <div class="icon-float" style="width:72px;height:72px;top:60%;left:72%;animation-duration:9s;animation-delay:3s">
+    <svg viewBox="0 0 38 38" fill="none" width="36" height="36">
+      <rect x="6" y="2" width="22" height="30" rx="3" stroke="rgba(255,255,255,.5)" stroke-width="2"/>
+      <line x1="10" y1="10" x2="24" y2="10" stroke="rgba(255,255,255,.4)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="10" y1="16" x2="24" y2="16" stroke="rgba(255,255,255,.4)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="10" y1="22" x2="18" y2="22" stroke="#b8963e" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M22 26l8 8" stroke="rgba(255,255,255,.5)" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="30" cy="34" r="4" stroke="rgba(255,255,255,.5)" stroke-width="2"/>
+    </svg>
+  </div>
+
+  <!-- Alvo/Meta -->
+  <div class="icon-float" style="width:78px;height:78px;top:14%;left:35%;animation-duration:8.5s;animation-delay:.8s">
+    <svg viewBox="0 0 40 40" fill="none" width="38" height="38">
+      <circle cx="20" cy="20" r="16" stroke="rgba(255,255,255,.3)" stroke-width="2"/>
+      <circle cx="20" cy="20" r="10" stroke="rgba(255,255,255,.4)" stroke-width="2"/>
+      <circle cx="20" cy="20" r="4" fill="#b8963e"/>
+      <line x1="28" y1="12" x2="22" y2="18" stroke="rgba(255,255,255,.6)" stroke-width="1.5" stroke-linecap="round"/>
+      <polyline points="32,8 28,8 28,12" stroke="rgba(255,255,255,.6)" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <!-- Estrelas decorativas -->
+  <div style="position:absolute;top:45%;left:45%;color:rgba(184,150,62,.4);font-size:20px">✦</div>
+  <div style="position:absolute;top:28%;left:28%;color:rgba(255,255,255,.15);font-size:14px">✦</div>
+  <div style="position:absolute;top:70%;left:50%;color:rgba(184,150,62,.3);font-size:10px">✦</div>
+  <div style="position:absolute;top:80%;left:30%;color:rgba(255,255,255,.1);font-size:18px">✦</div>
+
+  <!-- Conteúdo texto -->
+  <div class="left-content">
+    <div class="left-tag">Gestão Financeira</div>
+    <div class="left-title">Controle total<br>das suas finanças</div>
+    <div class="left-sub">Gerencie contas, movimentos e relatórios em um só lugar, com segurança e em tempo real.</div>
+    <div class="left-pills">
+      <span class="pill">Contas a Pagar</span>
+      <span class="pill">Fluxo de Caixa</span>
+      <span class="pill">Relatórios</span>
+    </div>
+  </div>
+</div>
+
+<!-- Lado direito -->
+<div class="right">
+  <div class="box">
+    <div class="logo">
+      <img src="logo-tally.svg" alt="Tally" style="filter:invert(20%) sepia(40%) saturate(500%) hue-rotate(100deg) brightness(40%)"/>
+    </div>
+    <h2>Bem-vindo de volta</h2>
+    <p class="sub">Entre com suas credenciais para acessar o sistema.</p>
+
+    <div class="fg">
+      <label>E-mail</label>
+      <input id="email" type="email" placeholder="seu@email.com" autocomplete="email"/>
+    </div>
+
+    <div class="fg">
+      <label>Senha</label>
+      <div class="inp-wrap">
+        <input id="senha" type="password" placeholder="••••••••" autocomplete="current-password" style="padding-right:42px"/>
+        <button class="eye-btn" type="button" onclick="toggleSenha()" id="eye-btn" aria-label="Mostrar senha">
+          <svg id="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <a href="esqueci-senha.html" class="forgot">Esqueci minha senha</a>
+
+    <button class="btn" id="btn-entrar" onclick="entrar()">Entrar</button>
+    <div class="errmsg" id="err"></div>
+    <div class="footer">Tally · Uso Privado</div>
+  </div>
 </div>
 
 <script type="module">
@@ -56,31 +204,32 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBbE4c5VA08a2F3jF0nVDivSgCtIeCuqKg",
-  authDomain: "tally-finance.firebaseapp.com",
-  projectId: "tally-finance",
-  storageBucket: "tally-finance.firebasestorage.app",
-  messagingSenderId: "118325290738",
-  appId: "1:118325290738:web:0d30137db3b6ea58e8d26b"
-};
+const firebaseConfig = {apiKey:"AIzaSyBbE4c5VA08a2F3jF0nVDivSgCtIeCuqKg",authDomain:"tally-finance.firebaseapp.com",projectId:"tally-finance",storageBucket:"tally-finance.firebasestorage.app",messagingSenderId:"118325290738",appId:"1:118325290738:web:0d30137db3b6ea58e8d26b"};
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-onAuthStateChanged(auth, async user => {
+onAuthStateChanged(auth,async user=>{
   if(user){
     const snap=await getDoc(doc(db,'users',user.uid));
-    if(snap.exists()&&snap.data().primeiroAcesso===true){
-      window.location.href='trocar-senha.html';
-    } else {
-      window.location.href='relatorios.html';
-    }
+    if(snap.exists()&&snap.data().primeiroAcesso===true) window.location.href='trocar-senha.html';
+    else window.location.href='relatorios.html';
   }
 });
 
-window.entrar = async () => {
+window.toggleSenha=()=>{
+  const inp=document.getElementById('senha');
+  const icon=document.getElementById('eye-icon');
+  if(inp.type==='password'){
+    inp.type='text';
+    icon.innerHTML='<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  } else {
+    inp.type='password';
+    icon.innerHTML='<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  }
+};
+
+window.entrar=async()=>{
   const email=document.getElementById('email').value.trim();
   const senha=document.getElementById('senha').value;
   const btn=document.getElementById('btn-entrar');
@@ -92,18 +241,20 @@ window.entrar = async () => {
   try{
     const cred=await signInWithEmailAndPassword(auth,email,senha);
     const snap=await getDoc(doc(db,'users',cred.user.uid));
-    if(snap.exists()&&snap.data().primeiroAcesso===true){
-      window.location.href='trocar-senha.html';
-    } else {
-      window.location.href='relatorios.html';
+    if(snap.exists()&&snap.data().ativo===false){
+      await auth.signOut();
+      mostrarErro('Acesso desativado. Entre em contato com o administrador.');
+      btn.disabled=false;btn.textContent='Entrar';return;
     }
+    if(snap.exists()&&snap.data().primeiroAcesso===true) window.location.href='trocar-senha.html';
+    else window.location.href='relatorios.html';
   }catch(e){
     btn.disabled=false;btn.textContent='Entrar';
     mostrarErro('E-mail ou senha incorretos.');
   }
 };
 
-function mostrarErro(msg){const err=document.getElementById('err');err.textContent=msg;err.classList.add('show');setTimeout(()=>err.classList.remove('show'),3000);}
+function mostrarErro(msg){const err=document.getElementById('err');err.textContent=msg;err.classList.add('show');setTimeout(()=>err.classList.remove('show'),4000);}
 document.getElementById('email').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('senha').focus();});
 document.getElementById('senha').addEventListener('keydown',e=>{if(e.key==='Enter')window.entrar();});
 document.getElementById('email').focus();
