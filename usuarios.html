@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tally — Usuários</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f5f3ef;--sf:#fff;--sf2:#f0ede8;--bd:rgba(0,0,0,.08);--bdm:rgba(0,0,0,.14);--tx:#1a1814;--tx2:#6b6560;--tx3:#a09a93;--green:#1a3a2a;--green2:#2d5e42;--red:#c94040;--grn:#2d7a4f;--grn-bg:#edf7f2;--grn-bd:rgba(45,122,79,.25);--blu:#1e5fa8;--blu-bg:#eef4fd;--r:10px;--rs:6px;--sh:0 1px 3px rgba(0,0,0,.06);--f:'IBM Plex Mono',monospace}
+body{font-family:var(--f);background:var(--bg);color:var(--tx);min-height:100vh;font-size:14px}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:220px;background:var(--green);display:flex;flex-direction:column;flex-shrink:0;min-height:100vh}
+.sb-brand{padding:1.2rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.1)}
+.sb-brand h1{font-size:20px;font-weight:600;color:#fff;letter-spacing:-0.02em}
+.sb-brand p{font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+.sb-nav{flex:1;padding-top:.75rem}
+.sb-sec{font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.08em;padding:10px 1.5rem 4px}
+.nav-a{display:flex;align-items:center;gap:9px;padding:9px 1.5rem;font-size:13px;font-family:var(--f);color:rgba(255,255,255,.55);border-left:3px solid transparent;text-decoration:none;transition:all .15s}
+.nav-a:hover{color:rgba(255,255,255,.9);background:rgba(255,255,255,.06)}
+.nav-a.on{color:#fff;background:rgba(255,255,255,.1);border-left-color:rgba(255,255,255,.5)}
+.nav-a svg{flex-shrink:0;opacity:.7}
+.sb-footer{padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.1)}
+.sb-email{font-size:11px;color:rgba(255,255,255,.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.sb-role{font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.btn-sair{width:100%;padding:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:6px;color:rgba(255,255,255,.6);font-size:11px;font-family:var(--f);cursor:pointer}
+.btn-sair:hover{background:rgba(255,255,255,.15);color:#fff}
+.nav-sub{display:flex;align-items:center;gap:9px;padding:7px 1.5rem 7px 2.75rem;font-size:12px;font-family:var(--mono);color:rgba(255,255,255,.4);border-left:3px solid transparent;text-decoration:none;transition:all .15s}
+.nav-sub:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.04)}
+.nav-sub.on{color:rgba(255,255,255,.9);border-left-color:rgba(255,255,255,.3)}
+.nav-sub::before{content:'·';font-size:14px;opacity:.6;margin-right:2px}
+.main{flex:1;overflow:auto}
+.topbar{background:var(--sf);border-bottom:1px solid var(--bd);padding:14px 28px;display:flex;align-items:center;justify-content:space-between}
+.tl .bc{font-size:12px;color:var(--tx3)}.tl .bc b{color:var(--tx);font-weight:500}
+.tl h1{font-size:18px;font-weight:500;margin-top:2px}
+.tr{display:flex;gap:8px}
+.content{padding:24px 28px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--rs);font-size:13px;cursor:pointer;border:none;font-family:var(--f);transition:all .15s}
+.btn-p{background:var(--green);color:#fff}.btn-p:hover{background:var(--green2)}
+.btn-g{background:none;border:1px solid var(--bdm);color:var(--tx)}.btn-g:hover{background:var(--sf2)}
+.btn-d{background:var(--red);color:#fff}.btn-d:hover{background:#a83535}
+.tcard{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;margin-bottom:20px}
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;font-size:11px;font-weight:500;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;padding:10px 16px;border-bottom:1px solid var(--bd);background:#fafaf7}
+tbody td{padding:11px 16px;border-bottom:1px solid var(--bd);font-size:13px;vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#fafaf7}
+.acts{display:flex;gap:4px;justify-content:flex-end}
+.bdg{display:inline-flex;align-items:center;font-size:11px;padding:3px 9px;border-radius:99px}
+.bdg-s{background:var(--grn-bg);color:var(--grn);border:1px solid var(--grn-bd)}
+.bdg-i{background:var(--blu-bg);color:var(--blu);border:1px solid rgba(30,95,168,.2)}
+.btn-i{padding:6px;border-radius:var(--rs);background:none;border:1px solid var(--bdm);color:var(--tx2);cursor:pointer;display:inline-flex;align-items:center;transition:all .15s}
+.btn-i:hover{background:var(--sf2)}
+.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:300;align-items:center;justify-content:center}.mbg.open{display:flex}
+.modal{background:var(--sf);border-radius:var(--r);padding:24px;width:400px;box-shadow:0 8px 32px rgba(0,0,0,.12)}
+.modal h3{font-size:15px;font-weight:500;margin-bottom:16px}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:12px;color:var(--tx2);margin-bottom:5px}
+.fg input,.fg select{width:100%;padding:8px 12px;border:1px solid var(--bdm);border-radius:var(--rs);font-family:var(--f);font-size:13px;color:var(--tx);background:var(--sf);outline:none;height:36px}
+.fg input:focus,.fg select:focus{border-color:var(--green)}
+.mbtns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.errtxt{font-size:12px;color:var(--red);margin-top:8px;display:none}
+.errtxt.show{display:block}
+.empty{text-align:center;padding:48px;color:var(--tx3);font-size:13px}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--tx);color:#fff;padding:10px 20px;border-radius:var(--r);font-size:13px;opacity:0;transition:all .3s;z-index:999}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div id="loading" style="display:flex;align-items:center;justify-content:center;height:100vh;font-size:13px;color:#a09a93;font-family:'IBM Plex Mono',monospace;background:#f5f3ef">Carregando...</div>
+<div class="layout" id="app" style="display:none">
+  <aside class="sidebar">
+    <div class="sb-brand">
+    <a href="relatorios.html" style="display:block;text-decoration:none">
+      <img src="logo-tally.svg" style="width:100%;max-width:180px;display:block"/>
+    </a>
+  </div>
+    <nav class="sb-nav">
+      <div class="sb-sec">Principal</div>
+      <a class="nav-a" href="relatorios.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Relatórios</a>
+      <div class="sb-sec">Financeiro</div>
+      <a class="nav-a" href="movimento.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Movimento</a>
+      <a class="nav-sub" href="historico.html">Histórico</a>
+      <a class="nav-a" href="contas.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Contas a Pagar</a>
+      <div class="sb-sec">Cadastros</div>
+      <a class="nav-a" href="fornecedores.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Fornecedores</a>
+      <a class="nav-a" href="categorias.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Categorias</a>
+      <div class="sb-sec">Admin</div>
+      <a class="nav-a on" href="usuarios.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Usuários</a>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-role" id="sb-role">—</div>
+      <div class="sb-email" id="sb-email">—</div>
+      <button class="btn-sair" onclick="sair()">Sair</button>
+    </div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <div class="tl"><div class="bc">Admin › <b>Usuários</b></div><h1>Usuários</h1></div>
+      <div class="tr"><button class="btn btn-p" onclick="abrirModal()">+ Novo Usuário</button></div>
+    </div>
+    <div class="content">
+      <div class="tcard">
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Cadastrado em</th><th style="text-align:right">Ações</th></tr></thead>
+            <tbody id="tbl"></tbody>
+          </table>
+          <div class="empty" id="empty" style="display:none">Nenhum usuário cadastrado.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal novo usuário -->
+<div class="mbg" id="modal">
+  <div class="modal">
+    <h3>Novo Usuário</h3>
+    <div class="fg"><label>Nome</label><input type="text" id="u-nome" placeholder="Nome completo"/></div>
+    <div class="fg"><label>E-mail</label><input type="email" id="u-email" placeholder="email@exemplo.com"/></div>
+    <div class="fg"><label>Senha</label><input type="password" id="u-senha" placeholder="Mínimo 6 caracteres"/></div>
+    <div class="fg"><label>Perfil</label><select id="u-role"><option value="user">Usuário</option><option value="admin">Administrador</option></select></div>
+    <div class="errtxt" id="u-err"></div>
+    <div class="mbtns">
+      <button class="btn btn-g" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-p" id="btn-criar" onclick="criarUsuario()">Criar Usuário</button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {apiKey:"AIzaSyBbE4c5VA08a2F3jF0nVDivSgCtIeCuqKg",authDomain:"tally-finance.firebaseapp.com",projectId:"tally-finance",storageBucket:"tally-finance.firebasestorage.app",messagingSenderId:"118325290738",appId:"1:118325290738:web:0d30137db3b6ea58e8d26b"};
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+const ADMIN='doug.alveslisboa@gmail.com';
+const toast=(msg,e)=>{var t=document.getElementById('toast');t.textContent=msg;t.className='show'+(e?' err':'');clearTimeout(t._t);t._t=setTimeout(()=>t.className='',2800);};
+
+window.sair=()=>signOut(auth).then(()=>window.location.href='index.html');
+
+onAuthStateChanged(auth,async user=>{
+  if(!user){window.location.href='index.html';return;}
+  if(user.email!==ADMIN){window.location.href='dashboard.html';return;} // só admin
+  document.getElementById('sb-email').textContent=user.email;
+  document.getElementById('sb-role').textContent='Administrador';
+  document.getElementById('loading').style.display='none';
+  document.getElementById('app').style.display='flex';
+  await load();
+});
+
+async function load(){
+  const snap=await getDocs(collection(db,'users'));
+  const tb=document.getElementById('tbl'),em=document.getElementById('empty');
+  if(snap.empty){tb.innerHTML='';em.style.display='';return;}
+  em.style.display='none';
+  tb.innerHTML=snap.docs.map(d=>{
+    const u=d.data();
+    const dt=u.createdAt?new Date(u.createdAt).toLocaleDateString('pt-BR'):'—';
+    return `<tr><td>${u.nome||'—'}</td><td>${u.email}</td><td><span class="bdg ${u.role==='admin'?'bdg-s':'bdg-i'}">${u.role==='admin'?'Admin':'Usuário'}</span></td><td>${dt}</td><td><div class="acts">${u.email!==ADMIN?`<button class="btn-i" style="color:var(--red)" title="Excluir" onclick="excluirUsuario('${d.id}','${u.nome||u.email}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>`:''}</div></td></tr>`;
+  }).join('');
+}
+
+window.abrirModal=()=>{['u-nome','u-email','u-senha'].forEach(i=>document.getElementById(i).value='');document.getElementById('u-role').value='user';document.getElementById('u-err').classList.remove('show');document.getElementById('modal').classList.add('open');};
+window.fecharModal=()=>document.getElementById('modal').classList.remove('open');
+
+window.criarUsuario=async()=>{
+  const nome=document.getElementById('u-nome').value.trim();
+  const email=document.getElementById('u-email').value.trim();
+  const senha=document.getElementById('u-senha').value;
+  const role=document.getElementById('u-role').value;
+  const err=document.getElementById('u-err');
+  if(!nome||!email||!senha){err.textContent='Preencha todos os campos.';err.classList.add('show');return;}
+  if(senha.length<6){err.textContent='Senha deve ter no mínimo 6 caracteres.';err.classList.add('show');return;}
+  const btn=document.getElementById('btn-criar');btn.disabled=true;btn.textContent='Criando...';err.classList.remove('show');
+  try{
+    const cred=await createUserWithEmailAndPassword(auth,email,senha);
+    await setDoc(doc(db,'users',cred.user.uid),{email,nome,role,primeiroAcesso:true,createdAt:new Date().toISOString()});
+    fecharModal();toast('Usuário '+nome+' criado!');await load();
+  }catch(e){
+    let msg='Erro ao criar usuário.';
+    if(e.code==='auth/email-already-in-use')msg='E-mail já cadastrado.';
+    if(e.code==='auth/invalid-email')msg='E-mail inválido.';
+    err.textContent=msg;err.classList.add('show');
+  }finally{btn.disabled=false;btn.textContent='Criar Usuário';}
+};
+
+window.excluirUsuario=async(uid,nome)=>{
+  if(!confirm('Excluir o usuário "'+nome+'"? Esta ação não pode ser desfeita.'))return;
+  await deleteDoc(doc(db,'users',uid));
+  toast('Usuário excluído.');await load();
+};
+
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))fecharModal();});
+</script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tally — Histórico</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f5f3ef;--sf:#fff;--sf2:#f0ede8;--sf3:#e8e4de;--bd:rgba(0,0,0,.08);--bdm:rgba(0,0,0,.14);--tx:#1a1814;--tx2:#6b6560;--tx3:#a09a93;--green:#1a3a2a;--green2:#2d5e42;--red:#c94040;--ora:#b07020;--grn:#2d7a4f;--pos:#1a6e3a;--neg:#c94040;--r:10px;--rs:6px;--sh:0 1px 3px rgba(0,0,0,.06);--mono:'IBM Plex Mono',monospace}
+body{font-family:var(--mono);background:var(--bg);color:var(--tx);min-height:100vh;font-size:14px}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:220px;background:var(--green);display:flex;flex-direction:column;flex-shrink:0;min-height:100vh}
+.sb-brand{padding:1.2rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.1)}
+.sb-brand h1{font-size:20px;font-weight:600;color:#fff;letter-spacing:-0.02em}
+.sb-brand p{font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+.sb-nav{flex:1;padding-top:.75rem}
+.sb-sec{font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.08em;padding:10px 1.5rem 4px}
+.nav-a{display:flex;align-items:center;gap:9px;padding:9px 1.5rem;font-size:13px;font-family:var(--mono);color:rgba(255,255,255,.55);border-left:3px solid transparent;text-decoration:none;transition:all .15s}
+.nav-a:hover{color:rgba(255,255,255,.9);background:rgba(255,255,255,.06)}
+.nav-a.on{color:#fff;background:rgba(255,255,255,.1);border-left-color:rgba(255,255,255,.5)}
+.nav-a svg{flex-shrink:0;opacity:.7}
+.nav-sub{display:flex;align-items:center;gap:9px;padding:7px 1.5rem 7px 2.75rem;font-size:12px;font-family:var(--mono);color:rgba(255,255,255,.4);border-left:3px solid transparent;text-decoration:none;transition:all .15s}
+.nav-sub:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.04)}
+.nav-sub.on{color:rgba(255,255,255,.9);border-left-color:rgba(255,255,255,.3)}
+.nav-sub::before{content:'·';font-size:14px;opacity:.6}
+.sb-footer{padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.1)}
+.sb-email{font-size:11px;color:rgba(255,255,255,.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.sb-role{font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.btn-sair{width:100%;padding:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:6px;color:rgba(255,255,255,.6);font-size:11px;font-family:var(--mono);cursor:pointer}
+.btn-sair:hover{background:rgba(255,255,255,.15);color:#fff}
+.main{flex:1;overflow:auto}
+.topbar{background:var(--sf);border-bottom:1px solid var(--bd);padding:14px 28px;display:flex;align-items:center;justify-content:space-between}
+.tl .bc{font-size:12px;color:var(--tx3)}.tl .bc b{color:var(--tx);font-weight:500}
+.tl h1{font-size:18px;font-weight:500;margin-top:2px}
+.content{padding:24px 28px}
+/* Histórico */
+.bo{background:#d0edda;color:#0f4423;border:1px solid #8ecba8;display:inline-block;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em}
+.bc2{background:var(--sf2);color:var(--tx3);border:1px solid var(--bd);display:inline-block;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em}
+.mt-m{font-size:15px;font-weight:600;margin:0 0 1rem;display:flex;align-items:baseline;gap:10px}
+.mt-m span{font-size:11px;font-weight:400;color:var(--tx3)}.mt-m span strong{color:var(--tx2)}
+.mt-m+.mt-m,.dc+.mt-m{margin-top:2rem}
+.dc{border:1px solid var(--bd);border-radius:10px;margin-bottom:8px;background:var(--sf);box-shadow:var(--sh)}
+.dh-m{display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;transition:background .15s;border-radius:10px}.dh-m:hover{background:var(--sf2)}
+.dhi{flex:1}.dd-m{font-size:14px;font-weight:600;display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.ds-m{font-size:11px;color:var(--tx3);display:flex;gap:18px}.ds-m strong{color:var(--tx2)}
+.dch{font-size:14px;color:var(--tx3);transition:transform .2s}.dch.open{transform:rotate(180deg)}
+.db-m{display:none;border-top:1px solid var(--bd)}.db-m.open{display:block}
+.he{display:flex;align-items:center;gap:12px;padding:10px 18px;font-size:13px;border-bottom:1px solid var(--bd);background:var(--sf)}
+.he-d{flex:1;font-weight:500}.he-i{font-size:12px;color:var(--tx3)}
+.he-l{font-size:13px;font-weight:600}.he-l.pos{color:var(--pos)}.he-l.neg{color:var(--neg)}
+.hd{display:flex;justify-content:space-between;padding:7px 18px 7px 34px;font-size:12px;background:var(--sf2);border-bottom:1px solid var(--bd)}
+.hd .dn{color:var(--tx2)}.hd .dv{color:var(--tx3)}
+.hdd{background:var(--sf2);border-top:1px solid var(--bd)}
+.hdd-l{padding:7px 18px;font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em}
+.hdd .hd{padding-left:18px}
+.hr-m{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:12px 18px;border-top:1px solid var(--bd);background:var(--bg);border-radius:0 0 10px 10px;font-size:11px;color:var(--tx3)}
+.hr-m strong{color:var(--tx2)}.hlf{font-size:15px;font-weight:700}.hlf.pos{color:var(--pos)}.hlf.neg{color:var(--neg)}
+.btn-reabrir{padding:5px 12px;border-radius:6px;border:1px solid var(--ora);color:var(--ora);background:none;font-size:11px;font-family:var(--mono);cursor:pointer}
+.btn-reabrir:hover{background:var(--ora);color:#fff}
+.empty{text-align:center;padding:4rem;color:var(--tx3);font-size:13px}
+.loading{text-align:center;padding:4rem;color:var(--tx3);font-size:13px}
+/* Filtro */
+.fbar{display:flex;gap:10px;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap}
+.fbar label{font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em}
+.fbar input[type=month]{padding:7px 12px;border:1px solid var(--bdm);border-radius:var(--rs);font-family:var(--mono);font-size:13px;color:var(--tx);background:var(--sf);outline:none;height:34px}
+.fbar input[type=month]:focus{border-color:var(--green)}
+.btn-g{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--rs);font-size:12px;cursor:pointer;border:1px solid var(--bdm);background:transparent;font-family:var(--mono);color:var(--tx2);transition:all .15s}
+.btn-g:hover{background:var(--sf2)}
+</style>
+</head>
+<body>
+<div id="loading" style="display:flex;align-items:center;justify-content:center;height:100vh;font-size:13px;color:#a09a93;font-family:'IBM Plex Mono',monospace;background:#f5f3ef">Carregando...</div>
+<div class="layout" id="app" style="display:none">
+  <aside class="sidebar">
+    <div class="sb-brand">
+    <a href="relatorios.html" style="display:block;text-decoration:none">
+      <img src="logo-tally.svg" style="width:100%;max-width:180px;display:block"/>
+    </a>
+  </div>
+    <nav class="sb-nav">
+      <div class="sb-sec">Principal</div>
+      <a class="nav-a" href="relatorios.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Relatórios</a>
+      <div class="sb-sec">Financeiro</div>
+      <a class="nav-a" href="movimento.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Movimento</a>
+      <a class="nav-sub on" href="historico.html">Histórico</a>
+      <a class="nav-a" href="contas.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Contas a Pagar</a>
+      <div class="sb-sec">Cadastros</div>
+      <a class="nav-a" href="fornecedores.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Fornecedores</a>
+      <a class="nav-a" href="categorias.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Categorias</a>
+      <div class="sb-sec" id="sec-admin" style="display:none">Admin</div>
+      <a class="nav-a" id="nav-usuarios" href="usuarios.html" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Usuários</a>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-role" id="sb-role">—</div>
+      <div class="sb-email" id="sb-email">—</div>
+      <button class="btn-sair" onclick="sair()">Sair</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="tl"><div class="bc">Financeiro › Movimento › <b>Histórico</b></div><h1>Histórico de Movimentos</h1></div>
+    </div>
+    <div class="content">
+      <div class="fbar">
+        <label>Filtrar por mês</label>
+        <input type="month" id="filtro-mes" onchange="renderHist()"/>
+        <button class="btn-g" onclick="limparFiltro()">Limpar</button>
+      </div>
+      <div id="hist-list"><div class="loading">Carregando...</div></div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {apiKey:"AIzaSyBbE4c5VA08a2F3jF0nVDivSgCtIeCuqKg",authDomain:"tally-finance.firebaseapp.com",projectId:"tally-finance",storageBucket:"tally-finance.firebasestorage.app",messagingSenderId:"118325290738",appId:"1:118325290738:web:0d30137db3b6ea58e8d26b"};
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+const ADMIN='doug.alveslisboa@gmail.com';
+
+const fmt=v=>'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtD=s=>new Date(s+'T00:00:00').toLocaleDateString('pt-BR');
+const iso=d=>d.toISOString().slice(0,10);
+const getTodayStr=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
+const getMesNome=s=>{const[y,m]=s.split('-');const d=new Date(y,parseInt(m)-1,1);const n=d.toLocaleString('pt-BR',{month:'long'});return n.charAt(0).toUpperCase()+n.slice(1)+' '+y;};
+
+let movData=[];
+
+window.sair=()=>signOut(auth).then(()=>window.location.href='index.html');
+
+onAuthStateChanged(auth,async user=>{
+  if(!user){window.location.href='index.html';return;}
+  const isAdmin=user.email===ADMIN;
+  document.getElementById('sb-email').textContent=user.email;
+  document.getElementById('sb-role').textContent=isAdmin?'Administrador':'Usuário';
+  if(isAdmin){document.getElementById('sec-admin').style.display='';document.getElementById('nav-usuarios').style.display='';}
+  document.getElementById('loading').style.display='none';
+  document.getElementById('app').style.display='flex';
+  await load();
+});
+
+async function load(){
+  try{
+    const snap=await getDoc(doc(db,'movimento','data'));
+    if(snap.exists()){
+      movData=JSON.parse(snap.data().financeData||'[]');
+      movData.forEach(d=>{
+        d.previousBalance=Number(d.previousBalance)||0;
+        d.incomes=d.incomes||[];
+        d.dailyExpenses=d.dailyExpenses||[];
+        d.incomes.forEach(i=>{i.value=Number(i.value)||0;i.linkedExpenses=i.linkedExpenses||[];i.linkedExpenses.forEach(le=>le.value=Number(le.value)||0);});
+        d.dailyExpenses.forEach(e=>e.value=Number(e.value)||0);
+      });
+      movData.sort((a,b)=>b.date.localeCompare(a.date));
+    }
+  }catch(e){console.error(e);}
+  renderHist();
+}
+
+window.renderHist=()=>{
+  const el=document.getElementById('hist-list');
+  const filtro=document.getElementById('filtro-mes').value;
+  const today=getTodayStr();
+
+  let dados=movData;
+  if(filtro) dados=movData.filter(d=>d.date.startsWith(filtro));
+  if(!dados.length){el.innerHTML='<div class="empty">Nenhum movimento encontrado.</div>';return;}
+
+  // Agrupar por mês
+  const grupos={};
+  dados.forEach(d=>{
+    const k=d.date.substring(0,7);
+    if(!grupos[k])grupos[k]={key:k,days:[],total:0};
+    grupos[k].days.push(d);
+    if(d.status==='closed'){
+      const sI=d.incomes.reduce((s,i)=>s+i.value,0);
+      const sL=d.incomes.reduce((s,i)=>s+i.linkedExpenses.reduce((x,le)=>x+le.value,0),0);
+      const sD=d.dailyExpenses.reduce((s,e)=>s+e.value,0);
+      grupos[k].total+=sI-sL-sD;
+    }
+  });
+
+  el.innerHTML=Object.values(grupos).map((g,gi)=>{
+    const diasHTML=g.days.map((day,di)=>{
+      const uid2=`${gi}-${di}`;
+      const isFirst=gi===0&&di===0&&!filtro;
+      const tE=day.incomes.reduce((s,i)=>s+i.value,0);
+      const tL=day.incomes.reduce((s,i)=>s+i.linkedExpenses.reduce((x,le)=>x+le.value,0),0);
+      const tD=day.dailyExpenses.reduce((s,e)=>s+e.value,0);
+      const liqD=day.previousBalance+tE-tL-tD;
+
+      const entradasH=day.incomes.map(inc=>{
+        const dT=inc.linkedExpenses.reduce((s,le)=>s+le.value,0);
+        const lE=inc.value-dT;
+        const dR=inc.linkedExpenses.map(le=>`<div class="hd"><span class="dn">${le.description}</span><span class="dv">${fmt(le.value)}</span></div>`).join('');
+        return `<div class="he"><span class="he-d">${inc.description}</span><span class="he-i">${fmt(inc.value)}</span><span class="he-l ${lE>=0?'pos':'neg'}">${fmt(lE)}</span></div>${dR}`;
+      }).join('');
+
+      const despD=day.dailyExpenses.length?`<div class="hdd"><div class="hdd-l">Despesas do Dia</div>${day.dailyExpenses.map(d=>`<div class="hd" style="padding-left:18px"><span class="dn">${d.description}</span><span class="dv">${fmt(d.value)}</span></div>`).join('')}</div>`:'';
+
+      const btnR=day.status==='closed'
+        ?`<a href="movimento.html" class="btn-reabrir" onclick="reabrirDia('${day.date}',event)">${day.date===today?'Abrir':'Reabrir'} Movimento</a>`
+        :'<span style="font-size:11px;color:var(--grn)">Em andamento</span>';
+
+      return `<div class="dc">
+        <div class="dh-m" onclick="toggleDia('${uid2}')">
+          <div class="dhi">
+            <div class="dd-m">${fmtD(day.date)}<span class="${day.status==='open'?'bo':'bc2'}">${day.status==='open'?'Aberto':'Fechado'}</span></div>
+            <div class="ds-m">
+              <span>Entradas <strong>${fmt(tE)}</strong></span>
+              <span>Saídas <strong>${fmt(tL+tD)}</strong></span>
+              <span>Saldo <strong style="color:${liqD>=0?'var(--pos)':'var(--neg)'}">${fmt(liqD)}</strong></span>
+            </div>
+          </div>
+          <span class="dch ${isFirst?'open':''}" id="dch-${uid2}">&#x2303;</span>
+        </div>
+        <div class="db-m ${isFirst?'open':''}" id="dbm-${uid2}">
+          ${entradasH||'<div style="padding:12px 18px;font-size:13px;color:var(--tx3)">Sem lançamentos</div>'}
+          ${despD}
+          <div class="hr-m">
+            <span>Saldo anterior: <strong>${fmt(day.previousBalance)}</strong></span>
+            <div style="display:flex;align-items:center;gap:12px">
+              ${btnR}
+              <span class="hlf ${liqD>=0?'pos':'neg'}">${fmt(liqD)}</span>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    const totalEnt=g.days.reduce((s,d)=>s+d.incomes.reduce((x,i)=>x+i.value,0),0);
+    return `<div class="mt-m">${getMesNome(g.key+'-01')}<span>· Entradas <strong>${fmt(totalEnt)}</strong> · Líquido <strong style="color:${g.total>=0?'var(--pos)':'var(--neg)'}">${fmt(g.total)}</strong></span></div>${diasHTML}`;
+  }).join('');
+};
+
+window.toggleDia=uid2=>{
+  document.getElementById('dbm-'+uid2).classList.toggle('open');
+  document.getElementById('dch-'+uid2).classList.toggle('open');
+};
+
+window.limparFiltro=()=>{
+  document.getElementById('filtro-mes').value='';
+  renderHist();
+};
+
+window.reabrirDia=async(date,e)=>{
+  e.preventDefault();
+  if(!confirm(`Abrir movimento de ${fmtD(date)}?`))return;
+  try{
+    const snap=await getDoc(doc(db,'movimento','data'));
+    if(snap.exists()){
+      const data=JSON.parse(snap.data().financeData||'[]');
+      const day=data.find(d=>d.date===date);
+      if(day){day.status='open';await setDoc(doc(db,'movimento','data'),{financeData:JSON.stringify(data)});}
+    }
+  }catch(e){console.error(e);}
+  window.location.href='movimento.html';
+};
+</script>
+</body>
+</html>

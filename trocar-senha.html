@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tally — Criar Senha</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f5f3ef;--sf:#fff;--bd:#ddd9d2;--tx:#1a1814;--tx2:#6b6560;--tx3:#a09a93;--green:#1a3a2a;--green2:#2d5e42;--red:#8b2020;--mono:'IBM Plex Mono',monospace}
+body{background:var(--bg);font-family:var(--mono);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.box{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:40px 36px;width:100%;max-width:400px;box-shadow:0 4px 24px rgba(0,0,0,.06)}
+.logo{margin-bottom:2rem}
+.logo img{width:180px}
+.badge{display:inline-block;background:#fff8e6;color:#7a5200;border:1px solid #e6c96a;border-radius:20px;font-size:11px;padding:4px 12px;margin-bottom:1.5rem}
+h2{font-size:16px;font-weight:600;margin-bottom:6px}
+.sub{font-size:12px;color:var(--tx3);margin-bottom:28px;line-height:1.6}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px}
+.fg input{width:100%;padding:10px 14px;border:1px solid var(--bd);border-radius:6px;font-family:var(--mono);font-size:13px;color:var(--tx);background:#f8f6f2;outline:none;transition:border-color .15s}
+.fg input:focus{border-color:var(--green2);background:#fff}
+.fg input::placeholder{color:var(--tx3)}
+.hint{font-size:11px;color:var(--tx3);margin-top:5px}
+.btn{width:100%;padding:12px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--mono);background:var(--green);color:#fff;margin-top:8px;transition:background .15s}
+.btn:hover{background:var(--green2)}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.errmsg{display:none;background:#fdf0f0;color:var(--red);font-size:12px;padding:10px 14px;border-radius:6px;margin-top:12px;text-align:center;border:1px solid rgba(139,32,32,.15)}
+.errmsg.show{display:block}
+.sucmsg{display:none;background:#edf7f2;color:#2d7a4f;font-size:12px;padding:10px 14px;border-radius:6px;margin-top:12px;text-align:center;border:1px solid rgba(45,122,79,.2)}
+.sucmsg.show{display:block}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* Força de senha */
+.forca{display:flex;gap:4px;margin-top:8px}
+.forca-bar{flex:1;height:4px;border-radius:2px;background:var(--bd);transition:background .3s}
+.forca-bar.fraca{background:#c94040}
+.forca-bar.media{background:#b07020}
+.forca-bar.forte{background:#2d7a4f}
+.forca-txt{font-size:11px;color:var(--tx3);margin-top:4px}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="logo">
+    <img src="logo-tally.svg" alt="Tally"/>
+  </div>
+  <div class="badge">⚠ Primeiro acesso</div>
+  <h2>Crie sua senha</h2>
+  <p class="sub">Por segurança, defina uma senha pessoal antes de continuar. Ela substitui a senha temporária fornecida pelo administrador.</p>
+  <div class="fg">
+    <label>Nova Senha</label>
+    <input id="nova" type="password" placeholder="Mínimo 6 caracteres" oninput="avaliarForca()"/>
+    <div class="forca" id="forca-bars">
+      <div class="forca-bar" id="b1"></div>
+      <div class="forca-bar" id="b2"></div>
+      <div class="forca-bar" id="b3"></div>
+    </div>
+    <div class="forca-txt" id="forca-txt"></div>
+  </div>
+  <div class="fg">
+    <label>Confirmar Senha</label>
+    <input id="conf" type="password" placeholder="Repita a nova senha"/>
+  </div>
+  <button class="btn" id="btn" onclick="trocar()">Criar Senha e Entrar</button>
+  <div class="errmsg" id="err"></div>
+  <div class="sucmsg" id="suc">Senha criada com sucesso! Redirecionando...</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {apiKey:"AIzaSyBbE4c5VA08a2F3jF0nVDivSgCtIeCuqKg",authDomain:"tally-finance.firebaseapp.com",projectId:"tally-finance",storageBucket:"tally-finance.firebasestorage.app",messagingSenderId:"118325290738",appId:"1:118325290738:web:0d30137db3b6ea58e8d26b"};
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+
+let currentUser=null;
+
+onAuthStateChanged(auth,user=>{
+  if(!user){window.location.href='index.html';return;}
+  currentUser=user;
+});
+
+window.avaliarForca=()=>{
+  const v=document.getElementById('nova').value;
+  const b1=document.getElementById('b1');
+  const b2=document.getElementById('b2');
+  const b3=document.getElementById('b3');
+  const txt=document.getElementById('forca-txt');
+  [b1,b2,b3].forEach(b=>b.className='forca-bar');
+  if(!v){txt.textContent='';return;}
+  let score=0;
+  if(v.length>=6)score++;
+  if(v.length>=8&&/[A-Z]/.test(v))score++;
+  if(/[0-9]/.test(v)&&/[^a-zA-Z0-9]/.test(v))score++;
+  if(score===1){b1.classList.add('fraca');txt.textContent='Fraca';}
+  else if(score===2){b1.classList.add('media');b2.classList.add('media');txt.textContent='Média';}
+  else if(score===3){b1.classList.add('forte');b2.classList.add('forte');b3.classList.add('forte');txt.textContent='Forte';}
+  else{b1.classList.add('fraca');txt.textContent='Fraca';}
+};
+
+window.trocar=async()=>{
+  const nova=document.getElementById('nova').value;
+  const conf=document.getElementById('conf').value;
+  const btn=document.getElementById('btn');
+  const err=document.getElementById('err');
+  const suc=document.getElementById('suc');
+
+  err.classList.remove('show');
+  if(nova.length<6){mostrarErro('A senha deve ter no mínimo 6 caracteres.');return;}
+  if(nova!==conf){mostrarErro('As senhas não coincidem.');return;}
+
+  btn.disabled=true;
+  btn.innerHTML='<span class="spin"></span>Salvando...';
+
+  try{
+    await updatePassword(currentUser,nova);
+    await updateDoc(doc(db,'users',currentUser.uid),{primeiroAcesso:false});
+    suc.classList.add('show');
+    setTimeout(()=>window.location.href='relatorios.html',1500);
+  }catch(e){
+    btn.disabled=false;btn.textContent='Criar Senha e Entrar';
+    if(e.code==='auth/requires-recent-login')mostrarErro('Sessão expirada. Faça login novamente.');
+    else mostrarErro('Erro ao salvar senha. Tente novamente.');
+  }
+};
+
+function mostrarErro(msg){const err=document.getElementById('err');err.textContent=msg;err.classList.add('show');}
+</script>
+</body>
+</html>

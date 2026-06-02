@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tally — Fornecedores</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f4f0;--sf:#fff;--sf2:#f0efe9;
+  --bd:rgba(0,0,0,.08);--bdm:rgba(0,0,0,.14);
+  --tx:#1a1a18;--tx2:#6b6b64;--tx3:#9b9b92;
+  --red:#c94040;--red-bg:#fdf0f0;--red-bd:rgba(201,64,64,.25);
+  --ora:#b07020;--ora-bg:#fdf5e8;--ora-bd:rgba(176,112,32,.25);
+  --grn:#2d7a4f;--grn-bg:#edf7f2;--grn-bd:rgba(45,122,79,.25);
+  --blu:#1e5fa8;--blu-bg:#eef4fd;
+  --r:10px;--rs:6px;--f:'IBM Plex Mono',monospace;
+  --sh:0 1px 3px rgba(0,0,0,.06);
+}
+body{font-family:var(--f);background:var(--bg);color:var(--tx);min-height:100vh;font-size:14px;line-height:1.5}
+.layout{display:flex;min-height:100vh}
+/* Sidebar */
+.sidebar{width:220px;background:#1a3a2a;display:flex;flex-direction:column;flex-shrink:0;min-height:100vh}
+.sb-brand{padding:1.2rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.1)}
+.sb-brand h1{font-size:20px;font-weight:600;color:#fff;letter-spacing:-0.02em}
+.sb-brand p{font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+.sb-nav{flex:1;padding-top:.75rem}
+.sb-sec{font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.08em;padding:10px 1.5rem 4px}
+.nav-a{display:flex;align-items:center;gap:9px;padding:9px 1.5rem;font-size:13px;font-family:var(--f);color:rgba(255,255,255,.55);border-left:3px solid transparent;text-decoration:none;transition:all .15s}
+.nav-a:hover{color:rgba(255,255,255,.9);background:rgba(255,255,255,.06)}
+.nav-a.on{color:#fff;background:rgba(255,255,255,.1);border-left-color:rgba(255,255,255,.5)}
+.nav-a svg{flex-shrink:0;opacity:.7}
+.sb-footer{padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.1)}
+.sb-email{font-size:11px;color:rgba(255,255,255,.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.sb-role{font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.btn-sair{width:100%;padding:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:6px;color:rgba(255,255,255,.6);font-size:11px;font-family:var(--f);cursor:pointer}
+.btn-sair:hover{background:rgba(255,255,255,.15);color:#fff}
+.nav-sub{display:flex;align-items:center;gap:9px;padding:7px 1.5rem 7px 2.75rem;font-size:12px;font-family:var(--mono);color:rgba(255,255,255,.4);border-left:3px solid transparent;text-decoration:none;transition:all .15s}
+.nav-sub:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.04)}
+.nav-sub.on{color:rgba(255,255,255,.9);border-left-color:rgba(255,255,255,.3)}
+.nav-sub::before{content:'·';font-size:14px;opacity:.6;margin-right:2px}
+/* Main */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:var(--sf);border-bottom:1px solid var(--bd);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
+.tl .bc{font-size:12px;color:var(--tx3)}
+.tl .bc b{color:var(--tx);font-weight:500}
+.tl h1{font-size:18px;font-weight:500;margin-top:2px}
+.tr{display:flex;gap:8px;align-items:center}
+.content{padding:24px 28px;flex:1;overflow-y:auto}
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--rs);font-size:13px;cursor:pointer;border:none;font-family:var(--f);transition:all .15s;white-space:nowrap;text-decoration:none}
+.btn-p{background:var(--tx);color:#fff}.btn-p:hover{background:#333}
+.btn-g{background:none;border:1px solid var(--bdm);color:var(--tx)}.btn-g:hover{background:var(--sf2)}
+.btn-d{background:var(--red);color:#fff;border:none}.btn-d:hover{background:#a83535}
+.btn-i{padding:6px;border-radius:var(--rs);background:none;border:1px solid var(--bdm);color:var(--tx2);cursor:pointer;display:inline-flex;align-items:center;transition:all .15s}
+.btn-i:hover{background:var(--sf2);color:var(--tx)}
+/* Card */
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh)}
+.card-h{padding:13px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.card-t{font-size:13px;font-weight:500}
+.card-lk{font-size:12px;color:var(--blu);text-decoration:none}.card-lk:hover{text-decoration:underline}
+/* Stats */
+.stats{display:grid;gap:12px;margin-bottom:20px}
+.stat{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)}
+.stat-lbl{font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.stat-val{font-size:21px;font-weight:500;margin-bottom:2px}
+.stat-sub{font-size:11px;color:var(--tx3)}
+/* Table */
+.tcard{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
+.tcard-top{padding:10px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;background:#fafaf7}
+.tcard-cnt{font-size:12px;color:var(--tx3)}
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;font-size:11px;font-weight:500;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;padding:10px 16px;border-bottom:1px solid var(--bd);background:#fafaf7;white-space:nowrap}
+tbody td{padding:11px 16px;border-bottom:1px solid var(--bd);font-size:13px;vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#fafaf7}
+.acts{display:flex;gap:4px;justify-content:flex-end}
+/* Badge */
+.bdg{display:inline-flex;align-items:center;font-size:11px;padding:3px 9px;border-radius:99px}
+.bdg-s{background:var(--grn-bg);color:var(--grn);border:1px solid var(--grn-bd)}
+.bdg-d{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd)}
+.bdg-w{background:var(--ora-bg);color:var(--ora);border:1px solid var(--ora-bd)}
+.bdg-i{background:var(--blu-bg);color:var(--blu);border:1px solid rgba(30,95,168,.2)}
+/* Dot */
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+/* Filter */
+.fbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.sw{position:relative;flex:1;min-width:200px}
+.sw svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--tx3);pointer-events:none}
+.si{width:100%;padding:7px 12px 7px 32px;border:1px solid var(--bdm);border-radius:var(--rs);font-family:var(--f);font-size:13px;color:var(--tx);background:var(--sf);outline:none;height:34px}
+.si:focus{border-color:var(--tx)}
+select.fs{padding:0 10px;border:1px solid var(--bdm);border-radius:var(--rs);font-family:var(--f);font-size:13px;color:var(--tx);background:var(--sf);outline:none;height:34px;cursor:pointer}
+select.fs:focus{border-color:var(--tx)}
+/* Drawer */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:200}
+.ov.open{display:block}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:460px;background:var(--sf);box-shadow:-4px 0 24px rgba(0,0,0,.1);z-index:201;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1)}
+.drawer.open{transform:translateX(0)}
+.dh{padding:20px 24px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.dt{font-size:16px;font-weight:500}
+.db{flex:1;overflow-y:auto;padding:24px}
+.df{padding:16px 24px;border-top:1px solid var(--bd);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0}
+/* Form */
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:12px;color:var(--tx2);margin-bottom:5px}
+.fg label .req{color:var(--red)}
+.fg input,.fg select,.fg textarea{width:100%;padding:8px 12px;border:1px solid var(--bdm);border-radius:var(--rs);font-family:var(--f);font-size:13px;color:var(--tx);background:var(--sf);outline:none;transition:border-color .15s}
+.fg input,.fg select{height:36px}
+.fg textarea{height:72px;resize:vertical}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--tx)}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.div{border:none;border-top:1px solid var(--bd);margin:20px 0}
+.ssec{font-size:12px;font-weight:500;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
+/* Modal */
+.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:300;align-items:center;justify-content:center}
+.mbg.open{display:flex}
+.modal{background:var(--sf);border-radius:var(--r);padding:24px;width:380px;box-shadow:0 8px 32px rgba(0,0,0,.12)}
+.modal h3{font-size:15px;font-weight:500;margin-bottom:8px}
+.modal p{font-size:13px;color:var(--tx2);margin-bottom:20px;line-height:1.5}
+.mbtns{display:flex;gap:8px;justify-content:flex-end}
+/* Toast */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--tx);color:#fff;padding:10px 20px;border-radius:var(--r);font-size:13px;opacity:0;transition:all .3s;z-index:999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.err{background:var(--red)}
+/* Empty */
+.empty{text-align:center;padding:48px;color:var(--tx3)}
+.empty svg{opacity:.3;margin-bottom:12px}
+.empty p{font-size:13px}
+/* Legend */
+.leg{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;font-size:12px;color:var(--tx2)}
+.leg-i{display:flex;align-items:center;gap:4px}
+.leg-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+@media(max-width:768px){.sidebar{display:none}.content{padding:16px}.drawer{width:100%}}
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.av{width:32px;height:32px;border-radius:50%;background:var(--sf2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--tx2);flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="layout">
+    <aside class="sidebar">
+    <div class="sb-brand">
+    <a href="relatorios.html" style="display:block;text-decoration:none">
+      <img src="logo-tally.svg" style="width:100%;max-width:180px;display:block"/>
+    </a>
+  </div>
+    <nav class="sb-nav">
+      <div class="sb-sec">Principal</div>
+      <a class="nav-a" href="relatorios.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Relatórios</a>
+      <div class="sb-sec">Financeiro</div>
+      <a class="nav-a" href="movimento.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Movimento</a>
+      <a class="nav-sub" href="historico.html">Histórico</a>
+      <a class="nav-a" href="contas.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Contas a Pagar</a>
+      <a class="nav-a" href="relatorios.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Relatórios</a>
+      <div class="sb-sec">Cadastros</div>
+      <a class="nav-a on" href="fornecedores.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Fornecedores</a>
+      <a class="nav-a" href="categorias.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Categorias</a>
+      <div class="sb-sec" id="sec-admin" style="display:none">Admin</div>
+      <a class="nav-a" id="nav-usuarios" href="usuarios.html" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Usuários</a>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-role" id="sb-role">—</div>
+      <div class="sb-email" id="sb-email">—</div>
+      <button class="btn-sair" onclick="sair()">Sair</button>
+    </div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <div class="tl"><div class="bc">Principal › <b>Fornecedores</b></div><h1>Fornecedores</h1></div>
+      <div class="tr"><button class="btn btn-p" onclick="openDrawer(null)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Novo Fornecedor</button></div>
+    </div>
+    <div class="content">
+      <div class="stats3">
+        <div class="stat"><div class="stat-lbl">Total</div><div class="stat-val" id="s-tot">0</div></div>
+        <div class="stat"><div class="stat-lbl">Ativos</div><div class="stat-val" id="s-at">0</div></div>
+        <div class="stat"><div class="stat-lbl">Com Contas em Aberto</div><div class="stat-val" id="s-ab">0</div></div>
+      </div>
+      <div class="fbar">
+        <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input class="si" id="busca" placeholder="Buscar por nome, CNPJ ou e-mail..." oninput="render()"></div>
+        <select class="fs" id="f-st" onchange="render()"><option value="todos">Todos</option><option value="ativo">Ativos</option><option value="inativo">Inativos</option></select>
+      </div>
+      <div class="tcard">
+        <div class="tcard-top"><span class="tcard-cnt" id="cnt">0 fornecedores</span></div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th style="width:44px"></th><th>Nome / Razão Social</th><th>CNPJ / CPF</th><th>Contato</th><th>Contas em Aberto</th><th>Status</th><th style="text-align:right">Ações</th></tr></thead>
+            <tbody id="tbl"></tbody>
+          </table>
+          <div class="empty" id="empty" style="display:none">
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            <p style="font-weight:500;margin-bottom:4px">Nenhum Fornecedor Cadastrado</p><p>Adicione fornecedores para vincular às suas contas.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="ov" id="ov" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="dh"><div class="dt" id="dt">Novo Fornecedor</div><button class="btn-i" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+  <div class="db" id="db"></div>
+  <div class="df" id="df"></div>
+</div>
+<div class="mbg" id="mdel"><div class="modal"><h3>Excluir Fornecedor?</h3><p id="mdel-msg"></p><div class="mbtns"><button class="btn btn-g" onclick="fModal()">Cancelar</button><button class="btn btn-d" onclick="confDel()">Excluir</button></div></div></div>
+<div id="toast"></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const firebaseConfig = {apiKey:"AIzaSyBbE4c5VA08a2F3jF0nVDivSgCtIeCuqKg",authDomain:"tally-finance.firebaseapp.com",projectId:"tally-finance",storageBucket:"tally-finance.firebasestorage.app",messagingSenderId:"118325290738",appId:"1:118325290738:web:0d30137db3b6ea58e8d26b"};
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+const ADMIN='doug.alveslisboa.gmail.com';
+window.sair=()=>signOut(auth).then(()=>window.location.href='index.html');
+onAuthStateChanged(auth,user=>{
+  if(!user){window.location.href='index.html';return;}
+  const isAdmin=user.email===ADMIN;
+  document.getElementById('sb-email').textContent=user.email;
+  document.getElementById('sb-role').textContent=isAdmin?'Administrador':'Usuário';
+  if(isAdmin){document.getElementById('sec-admin').style.display='';document.getElementById('nav-usuarios').style.display='';}
+  load();
+});
+
+// via Firebase
+var forn=[],editId=null,delId=null;
+function save(){/* via Firebase */}
+function uid(){return Math.random().toString(36).slice(2,9);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fmt(v){return 'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function ini(n){return n.split(' ').slice(0,2).map(function(p){return p[0]||'';}).join('').toUpperCase();}
+function getContas(){return _contas;}
+var _contas=[];
+function abertos(nome){return _contas.filter(function(c){return c.fornecedor&&c.fornecedor.toLowerCase()===nome.toLowerCase()&&c.status!=='pago'&&c.status!=='cancelado';});}
+async function load(){
+  const [fsn,csn]=await Promise.all([getDocs(collection(db,'fornecedores')),getDocs(collection(db,'contas'))]);
+  forn=[];fsn.forEach(d=>forn.push({id:d.id,...d.data()}));
+  _contas=[];csn.forEach(d=>_contas.push(d.data()));
+  render();stats();
+}
+function filtrar(){
+  var b=document.getElementById('busca').value.toLowerCase();
+  var st=document.getElementById('f-st').value;
+  return forn.filter(function(f){
+    var a=f.ativo!==false;
+    if(st==='ativo'&&!a)return false;
+    if(st==='inativo'&&a)return false;
+    if(b){var s=(f.nome+' '+(f.cnpj||'')+' '+(f.email||'')).toLowerCase();if(!s.includes(b))return false;}
+    return true;
+  });
+}
+function render(){
+  var l=filtrar();var tb=document.getElementById('tbl');var em=document.getElementById('empty');
+  document.getElementById('cnt').textContent=l.length+' fornecedor'+(l.length!==1?'es':'');
+  if(!l.length){tb.innerHTML='';em.style.display='';return;}
+  em.style.display='none';
+  tb.innerHTML=l.map(function(f){
+    var a=f.ativo!==false;var ab=abertos(f.nome);
+    return '<tr>'+
+      '<td><div class="av">'+ini(f.nome)+'</div></td>'+
+      '<td>'+esc(f.nome)+'</td>'+
+      '<td style="font-size:12px;color:var(--tx2)">'+(f.cnpj?esc(f.cnpj):'—')+'</td>'+
+      '<td><div style="font-size:12px">'+(f.email?esc(f.email):'—')+'</div>'+(f.tel?'<div style="font-size:11px;color:var(--tx3)">'+esc(f.tel)+'</div>':'')+'</td>'+
+      '<td>'+(ab.length?'<span style="font-size:12px;color:var(--red);font-weight:500">'+ab.length+' · '+fmt(ab.reduce(function(s,c){return s+c.valor;},0))+'</span>':'<span style="font-size:12px;color:var(--tx3)">—</span>')+'</td>'+
+      '<td><span class="bdg '+(a?'bdg-s':'bdg-d')+'">'+(a?'Ativo':'Inativo')+'</span></td>'+
+      '<td><div class="acts">'+
+        '<button class="btn-i" title="Editar" onclick="openDrawer(\''+f.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'+
+        '<button class="btn-i" title="'+(a?'Inativar':'Ativar')+'" onclick="togAtivo(\''+f.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M18.36 6.64a9 9 0 11-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg></button>'+
+        '<button class="btn-i" style="color:var(--red)" title="Excluir" onclick="askDel(\''+f.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>'+
+      '</div></td></tr>';
+  }).join('');
+}
+function stats(){
+  document.getElementById('s-tot').textContent=forn.length;
+  document.getElementById('s-at').textContent=forn.filter(function(f){return f.ativo!==false;}).length;
+  document.getElementById('s-ab').textContent=forn.filter(function(f){return abertos(f.nome).length>0;}).length;
+}
+function openDrawer(id){
+  editId=id;var f=id?forn.find(function(x){return x.id===id;})||{}:{};
+  document.getElementById('dt').textContent=id?'Editar Fornecedor':'Novo Fornecedor';
+  document.getElementById('db').innerHTML=
+    '<div class="ssec">Identificação</div>'+
+    '<div class="fg"><label>Nome / Razão Social <span class="req">*</span></label><input id="fn" value="'+(f.nome?esc(f.nome):'')+'" placeholder="Ex: Fornecedor Alfa Ltda" maxlength="150"></div>'+
+    '<div class="r2"><div class="fg"><label>CNPJ / CPF</label><input id="fc" value="'+(f.cnpj?esc(f.cnpj):'')+'" placeholder="00.000.000/0001-00" maxlength="20"></div>'+
+    '<div class="fg"><label>Tipo</label><select id="ftp"><option value="juridica"'+((!f.tipo||f.tipo==="juridica")?" selected":"")+'>Pessoa Jurídica</option><option value="fisica"'+(f.tipo==="fisica"?" selected":"")+'>Pessoa Física</option></select></div></div>'+
+    '<hr class="div">'+
+    '<div class="ssec">Contato</div>'+
+    '<div class="r2"><div class="fg"><label>E-mail</label><input id="fe" type="email" value="'+(f.email?esc(f.email):'')+'" placeholder="financeiro@empresa.com"></div>'+
+    '<div class="fg"><label>Telefone</label><input id="ftel" value="'+(f.tel?esc(f.tel):'')+'" placeholder="(92) 99999-0000" maxlength="20"></div></div>'+
+    '<div class="fg"><label>Endereço</label><input id="fend" value="'+(f.end?esc(f.end):'')+'" placeholder="Rua, número, bairro, cidade" maxlength="200"></div>'+
+    '<hr class="div">'+
+    '<div class="ssec">Dados Bancários</div>'+
+    '<div class="r2"><div class="fg"><label>Banco</label><input id="fb" value="'+(f.banco?esc(f.banco):'')+'" placeholder="Ex: Bradesco" maxlength="60"></div>'+
+    '<div class="fg"><label>Chave PIX</label><input id="fp" value="'+(f.pix?esc(f.pix):'')+'" placeholder="CNPJ, CPF, e-mail..." maxlength="100"></div></div>'+
+    '<div class="r2"><div class="fg"><label>Agência</label><input id="fag" value="'+(f.ag?esc(f.ag):'')+'" placeholder="0000" maxlength="10"></div>'+
+    '<div class="fg"><label>Conta</label><input id="fct" value="'+(f.conta?esc(f.conta):'')+'" placeholder="00000-0" maxlength="20"></div></div>'+
+    '<div class="fg"><label>Observações</label><textarea id="fob">'+(f.obs?esc(f.obs):'')+'</textarea></div>';
+  document.getElementById('df').innerHTML=
+    '<button class="btn btn-g" onclick="closeDrawer()">Cancelar</button>'+
+    '<button class="btn btn-p" onclick="saveForn()">'+
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>'+
+      (id?'Salvar Alterações':'Cadastrar')+
+    '</button>';
+  document.getElementById('ov').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+  setTimeout(function(){document.getElementById('fn').focus();},300);
+}
+function closeDrawer(){document.getElementById('ov').classList.remove('open');document.getElementById('drawer').classList.remove('open');editId=null;}
+async function saveForn(){
+  var n=document.getElementById('fn').value.trim();
+  if(!n){document.getElementById('fn').style.borderColor='var(--red)';toast('Informe o nome.',true);return;}
+  document.getElementById('fn').style.borderColor='';
+  var d={nome:n,tipo:document.getElementById('ftp').value,cnpj:document.getElementById('fc').value.trim(),email:document.getElementById('fe').value.trim(),tel:document.getElementById('ftel').value.trim(),end:document.getElementById('fend').value.trim(),banco:document.getElementById('fb').value.trim(),pix:document.getElementById('fp').value.trim(),ag:document.getElementById('fag').value.trim(),conta:document.getElementById('fct').value.trim(),obs:document.getElementById('fob').value.trim()};
+  if(editId){Object.assign(forn.find(function(x){return x.id===editId;}),d);await updateDoc(doc(db,'fornecedores',editId),d);toast('Fornecedor atualizado.');}
+  else{d.ativo=true;var ref=await addDoc(collection(db,'fornecedores'),d);forn.unshift(Object.assign({id:ref.id},d));toast('Fornecedor cadastrado.');}
+  closeDrawer();render();stats();
+}
+async function togAtivo(id){var f=forn.find(function(x){return x.id===id;});f.ativo=f.ativo===false;await updateDoc(doc(db,'fornecedores',id),{ativo:f.ativo});render();stats();toast(f.ativo?'Fornecedor ativado.':'Fornecedor inativado.');}
+function askDel(id){
+  delId=id;var f=forn.find(function(x){return x.id===id;});var ab=abertos(f.nome);
+  document.getElementById('mdel-msg').textContent=ab.length>0?'"'+f.nome+'" possui '+ab.length+' conta(s) em aberto.':'"'+f.nome+'" será excluído permanentemente.';
+  document.getElementById('mdel').classList.add('open');
+}
+function fModal(){document.getElementById('mdel').classList.remove('open');delId=null;}
+async function confDel(){var n=forn.find(function(f){return f.id===delId;})?.nome||'';await deleteDoc(doc(db,'fornecedores',delId));forn=forn.filter(function(f){return f.id!==delId;});render();stats();fModal();toast('Fornecedor "'+n+'" excluído.');}
+function toast(msg,e){var t=document.getElementById('toast');t.textContent=msg;t.className='show'+(e?' err':'');clearTimeout(t._t);t._t=setTimeout(function(){t.className='';},2800);}
+document.getElementById('mdel').addEventListener('click',function(e){if(e.target===this)fModal();});
+load();
+</script>
+</body>
+</html>
