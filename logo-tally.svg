@@ -1,24 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="480" viewBox="0 0 480 180" role="img">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 100" role="img">
 <title>Tally Gestão Financeira</title>
 
-<!-- Barras crescentes brancas -->
-<rect x="40" y="60" width="20" height="40" rx="3" fill="#fff"/>
-<rect x="68" y="42" width="20" height="58" rx="3" fill="#fff"/>
-<rect x="96" y="18" width="20" height="82" rx="3" fill="#fff"/>
+<!-- Barras crescentes -->
+<rect x="12" y="34" width="11" height="24" rx="2" fill="#fff"/>
+<rect x="28" y="22" width="11" height="36" rx="2" fill="#fff"/>
+<rect x="44" y="10" width="11" height="48" rx="2" fill="#fff"/>
 
-<!-- Seta diagonal dourada -->
-<line x1="45" y1="98" x2="116" y2="10" stroke="#b8963e" stroke-width="3.5" stroke-linecap="round"/>
-<polygon points="116,10 100,8 113,22" fill="#b8963e"/>
+<!-- Seta dourada -->
+<line x1="16" y1="56" x2="55" y2="6" stroke="#b8963e" stroke-width="2.5" stroke-linecap="round"/>
+<polygon points="55,6 45,5 53,14" fill="#b8963e"/>
 
 <!-- Arco dourado -->
-<path d="M26 100 Q54 136 116 110" fill="none" stroke="#b8963e" stroke-width="3" stroke-linecap="round"/>
+<path d="M6 58 Q24 76 56 64" fill="none" stroke="#b8963e" stroke-width="2" stroke-linecap="round"/>
 
-<!-- Nome Tally branco -->
-<text x="148" y="96" font-family="'IBM Plex Mono', monospace" font-size="70" font-weight="600" fill="#ffffff" letter-spacing="-2">Tally</text>
+<!-- Nome Tally -->
+<text x="68" y="54" font-family="'IBM Plex Mono', monospace" font-size="36" font-weight="600" fill="#ffffff" letter-spacing="-1">Tally</text>
 
 <!-- Linha + subtítulo + linha -->
-<line x1="40" y1="124" x2="64" y2="124" stroke="#b8963e" stroke-width="1.5"/>
-<text x="70" y="130" font-family="'IBM Plex Mono', monospace" font-size="13" font-weight="400" fill="rgba(255,255,255,0.55)" letter-spacing="3">GESTÃO FINANCEIRA</text>
-<line x1="294" y1="124" x2="318" y2="124" stroke="#b8963e" stroke-width="1.5"/>
+<line x1="12" y1="70" x2="22" y2="70" stroke="#b8963e" stroke-width="1.2"/>
+<text x="26" y="75" font-family="'IBM Plex Mono', monospace" font-size="7" font-weight="400" fill="rgba(255,255,255,0.5)" letter-spacing="2">GESTÃO FINANCEIRA</text>
+<line x1="158" y1="70" x2="168" y2="70" stroke="#b8963e" stroke-width="1.2"/>
 
 </svg>
