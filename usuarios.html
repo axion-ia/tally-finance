@@ -194,11 +194,7 @@ window.criarUsuario=async()=>{
   try{
     const cred=await createUserWithEmailAndPassword(auth,email,senha);
     await setDoc(doc(db,'users',cred.user.uid),{email,nome,role,primeiroAcesso:true,ativo:true,createdAt:new Date().toISOString()});
-    fecharModal();
-    toast('Usuário '+nome+' criado! Você precisará fazer login novamente.');
-    await load();
-    // Reloga o admin
-    setTimeout(()=>signOut(auth).then(()=>window.location.href='index.html'),2000);
+    fecharModal();toast('Usuário '+nome+' criado! Login: '+email);await load();
   }catch(e){
     let msg='Erro ao criar usuário.';
     if(e.code==='auth/email-already-in-use')msg='E-mail já cadastrado.';
