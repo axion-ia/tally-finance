@@ -82,11 +82,15 @@ tbody tr:hover{background:#fafaf7}
 .empty{text-align:center;padding:24px;color:var(--tx3);font-size:13px}
 @media print{
   .sidebar,.topbar,.fbar,.rg2,#aging,#fluxo-l,div[style*="grid-template-columns:1fr 1fr 1fr"],.tcard-top div:last-child{display:none!important}
-  body{background:#fff}
+  body{background:#fff;-webkit-print-color-adjust:exact}
   .main{overflow:visible}
   .content{padding:12px}
   .tcard{box-shadow:none;border:1px solid #ccc}
-  .stats4{grid-template-columns:repeat(4,1fr)}
+  .stats4{display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:8px!important;margin-bottom:12px!important}
+  .stat{padding:10px 12px!important;border:1px solid #ccc!important;box-shadow:none!important}
+  .stat-lbl{font-size:10px!important;margin-bottom:4px!important}
+  .stat-val{font-size:16px!important;white-space:nowrap!important}
+  .stat-sub{font-size:10px!important;margin-top:2px!important}
   .print-header{display:block!important}
 }
 .print-header{display:none;margin-bottom:16px}
