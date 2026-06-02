@@ -80,6 +80,18 @@ tbody tr:hover{background:#fafaf7}
 .bdg-w{background:var(--ora-bg);color:var(--ora);border:1px solid rgba(176,112,32,.25)}
 .bdg-i{background:#eef4fd;color:var(--blu);border:1px solid rgba(30,95,168,.2)}
 .empty{text-align:center;padding:24px;color:var(--tx3);font-size:13px}
+@media print{
+  .sidebar,.topbar .tr,.fbar,.rg2,#aging,#fluxo-l,.tcard-top div:last-child{display:none!important}
+  body{background:#fff}
+  .main{overflow:visible}
+  .content{padding:12px}
+  .tcard{box-shadow:none;border:1px solid #ccc}
+  .stats4{grid-template-columns:repeat(4,1fr)}
+  .print-header{display:block!important}
+}
+.print-header{display:none;margin-bottom:16px}
+.print-header h2{font-size:16px;font-weight:600}
+.print-header p{font-size:12px;color:var(--tx3);margin-top:4px}
 </style>
 </head>
 <body>
@@ -115,10 +127,16 @@ tbody tr:hover{background:#fafaf7}
     <div class="topbar">
       <div class="tl"><div class="bc">Principal › <b>Relatórios</b></div><h1>Relatórios</h1></div>
       <div class="tr">
+        <button class="btn btn-g" onclick="imprimir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimir</button>
         <button class="btn btn-g" onclick="exportRelCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exportar CSV</button>
       </div>
     </div>
     <div class="content">
+      <!-- Print header -->
+      <div class="print-header">
+        <h2>Tally — Relatórios</h2>
+        <p id="print-info">—</p>
+      </div>
       <!-- Saldo do Movimento -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px">
         <div style="background:var(--green);border-radius:10px;padding:1.25rem 1.5rem;box-shadow:var(--sh)">
@@ -162,7 +180,14 @@ tbody tr:hover{background:#fafaf7}
       </div>
 
       <div class="tcard">
-        <div class="tcard-top"><span class="tcard-cnt" id="tbl-cnt">Detalhamento</span></div>
+        <div class="tcard-top">
+          <span class="tcard-cnt" id="tbl-cnt">Detalhamento</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <label style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Filtrar dia:</label>
+            <input type="date" id="f-data" onchange="atualizar()" style="padding:4px 10px;border:1px solid var(--bdm);border-radius:var(--rs);font-family:var(--mono);font-size:12px;color:var(--tx);background:var(--sf);outline:none;height:30px"/>
+            <button class="btn btn-g" style="padding:4px 10px;font-size:12px" onclick="limparData()">Limpar</button>
+          </div>
+        </div>
         <div style="overflow-x:auto">
           <table>
             <thead><tr><th>Vencimento</th><th>Descrição</th><th>Categoria</th><th>Status</th><th style="text-align:right">Valor</th><th style="text-align:right">Pago</th></tr></thead>
@@ -269,8 +294,10 @@ function fillMeses(){
 function filtrar(){
   const mes=document.getElementById('f-mes').value;
   const sv=document.getElementById('f-st').value;
+  const data=document.getElementById('f-data').value;
   return contas.filter(c=>{
     const s2=st(c);
+    if(data) return c.vencimento===data;
     if(mes!=='todos'&&c.vencimento.slice(0,7)!==mes)return false;
     if(sv!=='todos'&&s2!==sv)return false;
     return true;
@@ -278,6 +305,20 @@ function filtrar(){
 }
 
 window.atualizar=()=>{const l=filtrar();kpis(l);chartMes(l);chartCat(l);aging(l);fluxo();tabela(l);};
+
+window.imprimir=()=>{
+  const mes=document.getElementById('f-mes').value;
+  const data=document.getElementById('f-data').value;
+  const info=document.getElementById('print-info');
+  let txt='';
+  if(data) txt=`Vencimento: ${fmtD(data)}`;
+  else if(mes!=='todos') txt=`Mês: ${document.getElementById('f-mes').options[document.getElementById('f-mes').selectedIndex].text}`;
+  else txt=`Todos os registros — ${new Date().toLocaleDateString('pt-BR')}`;
+  info.textContent=txt;
+  window.print();
+};
+
+window.limparData=()=>{document.getElementById('f-data').value='';atualizar();};
 
 function kpis(l){
   const tot=l.reduce((s,c)=>s+c.valor,0);
