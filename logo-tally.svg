@@ -1,24 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 100" role="img">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 90">
 <title>Tally Gestão Financeira</title>
 
 <!-- Barras crescentes -->
-<rect x="12" y="34" width="11" height="24" rx="2" fill="#fff"/>
-<rect x="28" y="22" width="11" height="36" rx="2" fill="#fff"/>
-<rect x="44" y="10" width="11" height="48" rx="2" fill="#fff"/>
+<rect x="8" y="30" width="13" height="28" rx="2" fill="#fff"/>
+<rect x="26" y="19" width="13" height="39" rx="2" fill="#fff"/>
+<rect x="44" y="6" width="13" height="52" rx="2" fill="#fff"/>
 
 <!-- Seta dourada -->
-<line x1="16" y1="56" x2="55" y2="6" stroke="#b8963e" stroke-width="2.5" stroke-linecap="round"/>
-<polygon points="55,6 45,5 53,14" fill="#b8963e"/>
+<line x1="12" y1="56" x2="57" y2="4" stroke="#b8963e" stroke-width="2.5" stroke-linecap="round"/>
+<polygon points="57,4 47,4 55,13" fill="#b8963e"/>
 
 <!-- Arco dourado -->
-<path d="M6 58 Q24 76 56 64" fill="none" stroke="#b8963e" stroke-width="2" stroke-linecap="round"/>
+<path d="M4 58 Q24 78 58 62" fill="none" stroke="#b8963e" stroke-width="2" stroke-linecap="round"/>
 
 <!-- Nome Tally -->
-<text x="68" y="54" font-family="'IBM Plex Mono', monospace" font-size="36" font-weight="600" fill="#ffffff" letter-spacing="-1">Tally</text>
+<text x="72" y="52" font-family="'IBM Plex Mono', monospace" font-size="40" font-weight="600" fill="#ffffff" letter-spacing="-1">Tally</text>
 
 <!-- Linha + subtítulo + linha -->
-<line x1="12" y1="70" x2="22" y2="70" stroke="#b8963e" stroke-width="1.2"/>
-<text x="26" y="75" font-family="'IBM Plex Mono', monospace" font-size="7" font-weight="400" fill="rgba(255,255,255,0.5)" letter-spacing="2">GESTÃO FINANCEIRA</text>
-<line x1="158" y1="70" x2="168" y2="70" stroke="#b8963e" stroke-width="1.2"/>
+<line x1="8" y1="68" x2="20" y2="68" stroke="#b8963e" stroke-width="1.2"/>
+<text x="24" y="73" font-family="'IBM Plex Mono', monospace" font-size="7.5" font-weight="400" fill="rgba(255,255,255,0.5)" letter-spacing="2">GESTÃO FINANCEIRA</text>
+<line x1="160" y1="68" x2="172" y2="68" stroke="#b8963e" stroke-width="1.2"/>
 
 </svg>
