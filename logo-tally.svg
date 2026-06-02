@@ -1,24 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="480" viewBox="0 0 480 160" role="img">
+<svg xmlns="http://www.w3.org/2000/svg" width="480" viewBox="0 0 480 180" role="img">
 <title>Tally Gestão Financeira</title>
 
 <!-- Barras crescentes brancas -->
-<rect x="28" y="50" width="16" height="32" rx="2" fill="#fff"/>
-<rect x="50" y="34" width="16" height="48" rx="2" fill="#fff"/>
-<rect x="72" y="14" width="16" height="68" rx="2" fill="#fff"/>
+<rect x="40" y="60" width="20" height="40" rx="3" fill="#fff"/>
+<rect x="68" y="42" width="20" height="58" rx="3" fill="#fff"/>
+<rect x="96" y="18" width="20" height="82" rx="3" fill="#fff"/>
 
 <!-- Seta diagonal dourada -->
-<line x1="32" y1="80" x2="88" y2="8" stroke="#b8963e" stroke-width="3" stroke-linecap="round"/>
-<polygon points="88,8 76,6 86,18" fill="#b8963e"/>
+<line x1="45" y1="98" x2="116" y2="10" stroke="#b8963e" stroke-width="3.5" stroke-linecap="round"/>
+<polygon points="116,10 100,8 113,22" fill="#b8963e"/>
 
 <!-- Arco dourado -->
-<path d="M18 82 Q40 112 88 90" fill="none" stroke="#b8963e" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M26 100 Q54 136 116 110" fill="none" stroke="#b8963e" stroke-width="3" stroke-linecap="round"/>
 
 <!-- Nome Tally branco -->
-<text x="114" y="80" font-family="'IBM Plex Mono', monospace" font-size="58" font-weight="600" fill="#ffffff" letter-spacing="-2">Tally</text>
+<text x="148" y="96" font-family="'IBM Plex Mono', monospace" font-size="70" font-weight="600" fill="#ffffff" letter-spacing="-2">Tally</text>
 
 <!-- Linha + subtítulo + linha -->
-<line x1="28" y1="104" x2="48" y2="104" stroke="#b8963e" stroke-width="1.5"/>
-<text x="54" y="109" font-family="'IBM Plex Mono', monospace" font-size="12" font-weight="400" fill="rgba(255,255,255,0.55)" letter-spacing="3">GESTÃO FINANCEIRA</text>
-<line x1="242" y1="104" x2="262" y2="104" stroke="#b8963e" stroke-width="1.5"/>
+<line x1="40" y1="124" x2="64" y2="124" stroke="#b8963e" stroke-width="1.5"/>
+<text x="70" y="130" font-family="'IBM Plex Mono', monospace" font-size="13" font-weight="400" fill="rgba(255,255,255,0.55)" letter-spacing="3">GESTÃO FINANCEIRA</text>
+<line x1="294" y1="124" x2="318" y2="124" stroke="#b8963e" stroke-width="1.5"/>
 
 </svg>
