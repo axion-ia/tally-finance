@@ -90,7 +90,8 @@ tbody tr:hover{background:#fafaf7}
     </nav>
     <div class="sb-footer">
       <div class="sb-role" id="sb-role">—</div>
-      <div class="sb-email" id="sb-email">—</div>
+      <div class="sb-email" id="sb-nome">—</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.3);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="sb-email">—</div>
       <button class="btn-sair" onclick="sair()">Sair</button>
     </div>
   </aside>
@@ -103,7 +104,7 @@ tbody tr:hover{background:#fafaf7}
       <div class="tcard">
         <div style="overflow-x:auto">
           <table>
-            <thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Cadastrado em</th><th style="text-align:right">Ações</th></tr></thead>
+            <thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th>Cadastrado em</th><th style="text-align:right">Ações</th></tr></thead>
             <tbody id="tbl"></tbody>
           </table>
           <div class="empty" id="empty" style="display:none">Nenhum usuário cadastrado.</div>
@@ -132,8 +133,8 @@ tbody tr:hover{background:#fafaf7}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, doc, setDoc, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {apiKey:"AIzaSyBbE4c5VA08a2F3jF0nVDivSgCtIeCuqKg",authDomain:"tally-finance.firebaseapp.com",projectId:"tally-finance",storageBucket:"tally-finance.firebasestorage.app",messagingSenderId:"118325290738",appId:"1:118325290738:web:0d30137db3b6ea58e8d26b"};
 const app=initializeApp(firebaseConfig);
@@ -144,11 +145,16 @@ const toast=(msg,e)=>{var t=document.getElementById('toast');t.textContent=msg;t
 
 window.sair=()=>signOut(auth).then(()=>window.location.href='index.html');
 
+let adminEmail='', adminUID='';
+
 onAuthStateChanged(auth,async user=>{
   if(!user){window.location.href='index.html';return;}
-  if(user.email!==ADMIN){window.location.href='dashboard.html';return;} // só admin
+  if(user.email!==ADMIN){window.location.href='relatorios.html';return;}
+  adminEmail=user.email; adminUID=user.uid;
   document.getElementById('sb-email').textContent=user.email;
   document.getElementById('sb-role').textContent='Administrador';
+  // Buscar nome
+  try{const uSnap=await getDoc(doc(db,'users',user.uid));if(uSnap.exists()&&uSnap.data().nome){document.getElementById('sb-nome').textContent=uSnap.data().nome;}}catch(e){}
   document.getElementById('loading').style.display='none';
   document.getElementById('app').style.display='flex';
   await load();
@@ -162,7 +168,13 @@ async function load(){
   tb.innerHTML=snap.docs.map(d=>{
     const u=d.data();
     const dt=u.createdAt?new Date(u.createdAt).toLocaleDateString('pt-BR'):'—';
-    return `<tr><td>${u.nome||'—'}</td><td>${u.email}</td><td><span class="bdg ${u.role==='admin'?'bdg-s':'bdg-i'}">${u.role==='admin'?'Admin':'Usuário'}</span></td><td>${dt}</td><td><div class="acts">${u.email!==ADMIN?`<button class="btn-i" style="color:var(--red)" title="Excluir" onclick="excluirUsuario('${d.id}','${u.nome||u.email}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>`:''}</div></td></tr>`;
+    const ativo=u.ativo!==false;
+    const statusBdg=`<span class="bdg ${ativo?'bdg-s':'bdg-d'}">${ativo?'Ativo':'Inativo'}</span>`;
+    const acoes=u.email!==ADMIN?`
+      <button class="btn-i" title="${ativo?'Desativar':'Ativar'}" onclick="toggleAtivo('${d.id}','${u.nome||u.email}',${ativo})">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M18.36 6.64a9 9 0 11-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+      </button>`:''
+    return `<tr><td>${u.nome||'—'}</td><td>${u.email}</td><td><span class="bdg ${u.role==='admin'?'bdg-s':'bdg-i'}">${u.role==='admin'?'Admin':'Usuário'}</span></td><td>${statusBdg}</td><td>${dt}</td><td><div class="acts">${acoes}</div></td></tr>`;
   }).join('');
 }
 
@@ -179,9 +191,13 @@ window.criarUsuario=async()=>{
   if(senha.length<6){err.textContent='Senha deve ter no mínimo 6 caracteres.';err.classList.add('show');return;}
   const btn=document.getElementById('btn-criar');btn.disabled=true;btn.textContent='Criando...';err.classList.remove('show');
   try{
-    const cred=await createUserWithEmailAndPassword(auth,email,senha);
-    await setDoc(doc(db,'users',cred.user.uid),{email,nome,role,primeiroAcesso:true,createdAt:new Date().toISOString()});
-    fecharModal();toast('Usuário '+nome+' criado!');await load();
+    // App secundário para não deslogar o admin
+    const secondApp=initializeApp(firebaseConfig,'secondary-'+Date.now());
+    const secondAuth=getAuth(secondApp);
+    const cred=await createUserWithEmailAndPassword(secondAuth,email,senha);
+    await setDoc(doc(db,'users',cred.user.uid),{email,nome,role,primeiroAcesso:true,ativo:true,createdAt:new Date().toISOString()});
+    await signOut(secondAuth);
+    fecharModal();toast('Usuário '+nome+' criado! Login: '+email);await load();
   }catch(e){
     let msg='Erro ao criar usuário.';
     if(e.code==='auth/email-already-in-use')msg='E-mail já cadastrado.';
@@ -190,10 +206,12 @@ window.criarUsuario=async()=>{
   }finally{btn.disabled=false;btn.textContent='Criar Usuário';}
 };
 
-window.excluirUsuario=async(uid,nome)=>{
-  if(!confirm('Excluir o usuário "'+nome+'"? Esta ação não pode ser desfeita.'))return;
-  await deleteDoc(doc(db,'users',uid));
-  toast('Usuário excluído.');await load();
+window.toggleAtivo=async(uid,nome,ativo)=>{
+  const acao=ativo?'desativar':'ativar';
+  if(!confirm(`Deseja ${acao} o usuário "${nome}"?`))return;
+  await updateDoc(doc(db,'users',uid),{ativo:!ativo});
+  toast(`Usuário ${nome} ${ativo?'desativado':'ativado'}.`);
+  await load();
 };
 
 document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))fecharModal();});

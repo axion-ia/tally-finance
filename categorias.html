@@ -166,7 +166,8 @@ select.fs:focus{border-color:var(--tx)}
     </nav>
     <div class="sb-footer">
       <div class="sb-role" id="sb-role">—</div>
-      <div class="sb-email" id="sb-email">—</div>
+      <div class="sb-email" id="sb-nome">—</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.3);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="sb-email">—</div>
       <button class="btn-sair" onclick="sair()">Sair</button>
     </div>
   </aside>
@@ -232,6 +233,8 @@ onAuthStateChanged(auth,user=>{
   const isAdmin=user.email===ADMIN;
   document.getElementById('sb-email').textContent=user.email;
   document.getElementById('sb-role').textContent=isAdmin?'Administrador':'Usuário';
+  // Buscar nome do usuário
+  try{const uSnap=await getDoc(doc(db,'users',user.uid));if(uSnap.exists()&&uSnap.data().nome){document.getElementById('sb-nome').textContent=uSnap.data().nome;}}catch(e){}
   if(isAdmin){document.getElementById('sec-admin').style.display='';document.getElementById('nav-usuarios').style.display='';}
   load();
 });
