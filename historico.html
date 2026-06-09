@@ -160,6 +160,35 @@ async function load(){
         d.incomes.forEach(i=>{i.value=Number(i.value)||0;i.linkedExpenses=i.linkedExpenses||[];i.linkedExpenses.forEach(le=>le.value=Number(le.value)||0);});
         d.dailyExpenses.forEach(e=>e.value=Number(e.value)||0);
       });
+
+      // Preencher dias faltantes entre o primeiro registro e hoje
+      if(movData.length){
+        const datas=new Set(movData.map(d=>d.date));
+        const primeiro=movData.slice().sort((a,b)=>a.date.localeCompare(b.date))[0].date;
+        const today=getTodayStr();
+        let cur=new Date(primeiro+'T00:00:00');
+        const fim=new Date(today+'T00:00:00');
+        while(cur<=fim){
+          const ds=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');
+          if(!datas.has(ds)){
+            movData.push({date:ds,status:'closed',incomes:[],dailyExpenses:[],previousBalance:0,net:0});
+          }
+          cur.setDate(cur.getDate()+1);
+        }
+      }
+
+      // Recalcular saldos na ordem correta
+      movData.sort((a,b)=>a.date.localeCompare(b.date));
+      let running=0,lastClosed='---';
+      movData.forEach(d=>{
+        d.previousBalance=running;d.referenceDate=lastClosed;
+        const sI=d.incomes.reduce((s,i)=>s+i.value,0);
+        const sL=d.incomes.reduce((s,i)=>s+i.linkedExpenses.reduce((x,le)=>x+le.value,0),0);
+        const sD=d.dailyExpenses.reduce((s,e)=>s+e.value,0);
+        d.net=sI-sL-sD;
+        if(d.status==='closed'){running+=d.net;lastClosed=d.date;}
+      });
+
       movData.sort((a,b)=>b.date.localeCompare(a.date));
     }
   }catch(e){console.error(e);}
