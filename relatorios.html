@@ -185,10 +185,12 @@ tbody tr:hover{background:#fafaf7}
       <div class="tcard">
         <div class="tcard-top">
           <span class="tcard-cnt" id="tbl-cnt">Detalhamento</span>
-          <div style="display:flex;align-items:center;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
             <label style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Filtrar dia:</label>
             <input type="date" id="f-data" onchange="atualizar()" style="padding:4px 10px;border:1px solid var(--bdm);border-radius:var(--rs);font-family:var(--mono);font-size:12px;color:var(--tx);background:var(--sf);outline:none;height:30px"/>
-            <button class="btn btn-g" style="padding:4px 10px;font-size:12px" onclick="limparData()">Limpar</button>
+            <select id="f-tipo-rel" onchange="atualizar()" style="padding:0 10px;border:1px solid var(--bdm);border-radius:var(--rs);font-family:var(--mono);font-size:12px;color:var(--tx);background:var(--sf);outline:none;height:30px;cursor:pointer"><option value="todos">Todos os Tipos</option><option value="fixa">Fixa</option><option value="variavel">Variável</option></select>
+            <select id="f-st-tbl" onchange="atualizar()" style="padding:0 10px;border:1px solid var(--bdm);border-radius:var(--rs);font-family:var(--mono);font-size:12px;color:var(--tx);background:var(--sf);outline:none;height:30px;cursor:pointer"><option value="todos">Todos os Status</option><option value="pendente">Pendente</option><option value="atrasado">Atrasado</option><option value="pago">Pago</option></select>
+            <button class="btn btn-g" style="padding:4px 10px;font-size:12px" onclick="limparFiltrosTbl()">Limpar</button>
             <button class="btn btn-g" style="padding:4px 10px;font-size:12px" onclick="imprimir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimir</button>
           </div>
         </div>
@@ -299,11 +301,15 @@ function filtrar(){
   const mes=document.getElementById('f-mes').value;
   const sv=document.getElementById('f-st').value;
   const data=document.getElementById('f-data').value;
+  const tipo=document.getElementById('f-tipo-rel').value;
+  const stTbl=document.getElementById('f-st-tbl').value;
   return contas.filter(c=>{
     const s2=st(c);
     if(data) return c.vencimento===data;
     if(mes!=='todos'&&c.vencimento.slice(0,7)!==mes)return false;
     if(sv!=='todos'&&s2!==sv)return false;
+    if(tipo!=='todos'&&(c.tipoDespesa||'fixa')!==tipo)return false;
+    if(stTbl!=='todos'&&s2!==stTbl)return false;
     return true;
   });
 }
@@ -323,6 +329,7 @@ window.imprimir=()=>{
 };
 
 window.limparData=()=>{document.getElementById('f-data').value='';atualizar();};
+window.limparFiltrosTbl=()=>{document.getElementById('f-data').value='';document.getElementById('f-tipo-rel').value='todos';document.getElementById('f-st-tbl').value='todos';atualizar();};
 
 function kpis(l){
   const tot=l.reduce((s,c)=>s+c.valor,0);
