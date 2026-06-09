@@ -154,12 +154,12 @@ select.fs:focus{border-color:var(--green)}
       <div class="fbar">
         <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input class="si" id="busca" placeholder="Buscar por descrição ou fornecedor..." oninput="render()"></div>
         <select class="fs" id="f-st" onchange="render()"><option value="todos">Todos os Status</option><option value="pendente">Pendente</option><option value="atrasado">Atrasado</option><option value="pago">Pago</option><option value="cancelado">Cancelado</option></select>
-        <select class="fs" id="f-tipo" onchange="render()"><option value="todos">Todos os Tipos</option><option value="fixa">Despesa Fixa</option><option value="variavel">Despesa Variável</option><option value="investimento">Investimento</option></select>
+        <select class="fs" id="f-tipo" onchange="render()"><option value="todos">Todos os Tipos</option><option value="fixa">Despesa Fixa</option><option value="variavel">Despesa Variável</option></select>
       </div>
       <div class="tcard">
         <div class="tcard-top"><span class="tcard-cnt" id="cnt">0 registros</span><button class="btn btn-g" style="font-size:12px;padding:5px 12px" onclick="exportCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exportar CSV</button></div>
         <div style="overflow-x:auto">
-          <table><thead><tr><th>Vencimento</th><th>Descrição</th><th>Fornecedor</th><th>Categoria</th><th>Parcela</th><th>Status</th><th style="text-align:right">Valor</th><th style="text-align:right">Ações</th></tr></thead><tbody id="tbl"></tbody></table>
+          <table><thead><tr><th>Vencimento</th><th>Descrição</th><th>Fornecedor</th><th>Tipo</th><th>Parcela</th><th>Status</th><th style="text-align:right">Valor</th><th style="text-align:right">Ações</th></tr></thead><tbody id="tbl"></tbody></table>
           <div class="empty" id="empty" style="display:none"><p style="font-weight:500;margin-bottom:4px">Nenhum Lançamento Encontrado</p><p>Ajuste os filtros ou adicione um novo lançamento.</p></div>
         </div>
       </div>
@@ -222,9 +222,9 @@ const mesLabel=k=>{var d=new Date(k+'-01T00:00:00');return d.toLocaleDateString(
 let hoje=new Date();hoje.setHours(0,0,0,0);
 const diff=s=>Math.round((hoje-new Date(s+'T00:00:00'))/86400000);
 const st=c=>{if(c.status==='pago'||c.status==='cancelado')return c.status;return diff(c.vencimento)>0?'atrasado':'pendente';};
-const getCat=id=>cats.find(c=>c.id===id)||null;
+const TL={fixa:'Fixa',variavel:'Variável'};
 
-let contas=[],cats=[],mesSel='',editId=null,baixaId=null,delId=null;
+let contas=[],mesSel='',editId=null,baixaId=null,delId=null;
 
 window.sair=()=>signOut(auth).then(()=>window.location.href='index.html');
 const toast=(msg,e)=>{var t=document.getElementById('toast');t.textContent=msg;t.className='show'+(e?' err':'');clearTimeout(t._t);t._t=setTimeout(()=>t.className='',2800);};
@@ -244,10 +244,8 @@ onAuthStateChanged(auth,async user=>{
 });
 
 async function load(){
-  const [csn,ksn]=await Promise.all([getDocs(collection(db,'contas')),getDocs(collection(db,'categorias'))]);
+  const csn=await getDocs(collection(db,'contas'));
   contas=[];csn.forEach(d=>contas.push({id:d.id,...d.data()}));
-  cats=[];ksn.forEach(d=>cats.push({id:d.id,...d.data()}));
-  // Preencher seletor de anos
   const anos=[...new Set(contas.map(c=>c.vencimento.slice(0,4)))].sort();
   const anoAtual=String(hoje.getFullYear());
   if(!anos.includes(anoAtual))anos.push(anoAtual);anos.sort();
@@ -278,7 +276,7 @@ function filtrar(){
     else if(sv==='pendente'&&s2!=='pendente')return false;
     else if(sv==='pago'&&s2!=='pago')return false;
     else if(sv==='cancelado'&&s2!=='cancelado')return false;
-    if(tv!=='todos'){const cat=c.catId?getCat(c.catId):null;const tipo=cat?cat.tipo:(c.tipoDespesa||'');if(tipo!==tv)return false;}
+    if(tv!=='todos'&&(c.tipoDespesa||'')!==tv)return false;
     return true;
   });
 }
@@ -291,38 +289,18 @@ window.render=()=>{
   const SB={pago:'bdg-s',atrasado:'bdg-d',pendente:'bdg-i',cancelado:'bdg-w'};
   const SL={pago:'Pago',atrasado:'Atrasado',pendente:'Pendente',cancelado:'Cancelado'};
   tb.innerHTML=lista.map(c=>{
-    const s2=st(c),cat=c.catId?getCat(c.catId):null,df=diff(c.vencimento);
+    const s2=st(c),df=diff(c.vencimento);
     const atr=s2==='atrasado'?`<br><span style="font-size:10px;color:var(--red)">${df} dia(s) em atraso</span>`:'';
     const parc=c.totalParcelas>1?(c.numParcela+'/'+c.totalParcelas):'—';
     const recTag=c.recorrente?'<span style="font-size:10px;color:var(--blu);margin-left:4px">↻</span>':'';
-    const catCell=cat?`<span style="display:inline-flex;align-items:center;gap:5px"><span class="dot" style="background:${cat.cor}"></span>${esc(cat.nome)}</span>`:`<span style="font-size:11px;color:var(--blu);cursor:pointer" onclick="selCat(event,'${c.id}')">+ Definir</span>`;
+    const tipoCell=c.tipoDespesa==='variavel'?'<span class="bdg bdg-w">Variável</span>':'<span class="bdg bdg-i">Fixa</span>';
     let ac='';
     if(s2!=='pago'&&s2!=='cancelado')ac+=`<button class="btn-i" title="Pagar" onclick="openBaixa('${c.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg></button>`;
     if(s2==='pago')ac+=`<button class="btn-i" title="Desfazer" style="color:var(--ora)" onclick="desfazer('${c.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg></button>`;
     if(s2!=='cancelado')ac+=`<button class="btn-i" title="Editar" onclick="openDrawer('${c.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>`;
     ac+=`<button class="btn-i" style="color:var(--red)" title="Excluir" onclick="openDel('${c.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>`;
-    return `<tr><td>${fmtD(c.vencimento)}${atr}</td><td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(c.descricao)}">${esc(c.descricao)}${recTag}</td><td style="color:var(--tx2);font-size:12px">${esc(c.fornecedor||'—')}</td><td onclick="selCat(event,'${c.id}')" style="cursor:pointer">${catCell}</td><td style="color:var(--tx3);font-size:12px">${parc}</td><td><span class="bdg ${SB[s2]}">${SL[s2]}</span></td><td style="text-align:right;font-weight:500">${fmt(c.valor)}</td><td><div class="acts">${ac}</div></td></tr>`;
+    return `<tr><td>${fmtD(c.vencimento)}${atr}</td><td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(c.descricao)}">${esc(c.descricao)}${recTag}</td><td style="color:var(--tx2);font-size:12px">${esc(c.fornecedor||'—')}</td><td>${tipoCell}</td><td style="color:var(--tx3);font-size:12px">${parc}</td><td><span class="bdg ${SB[s2]}">${SL[s2]}</span></td><td style="text-align:right;font-weight:500">${fmt(c.valor)}</td><td><div class="acts">${ac}</div></td></tr>`;
   }).join('');
-};
-
-window.selCat=(e,contaId)=>{
-  e.stopPropagation();
-  const old=document.getElementById('cat-popup');if(old){old.remove();return;}
-  const td=e.currentTarget;const rect=td.getBoundingClientRect();
-  const popup=document.createElement('div');popup.id='cat-popup';popup.className='cat-popup';
-  popup.style.top=(rect.bottom+4)+'px';popup.style.left=rect.left+'px';
-  const opt0=document.createElement('div');opt0.className='cat-popup-item';opt0.style.color='var(--tx3)';opt0.textContent='Sem Categoria';
-  opt0.onclick=ev=>{ev.stopPropagation();setCat(contaId,null);popup.remove();};popup.appendChild(opt0);
-  cats.forEach(cat=>{const div=document.createElement('div');div.className='cat-popup-item';div.innerHTML=`<span style="width:8px;height:8px;border-radius:50%;background:${cat.cor};display:inline-block;flex-shrink:0"></span>${esc(cat.nome)}`;div.onclick=ev=>{ev.stopPropagation();setCat(contaId,cat.id);popup.remove();};popup.appendChild(div);});
-  document.body.appendChild(popup);
-  setTimeout(()=>{document.addEventListener('click',function rem(){popup.remove();document.removeEventListener('click',rem);});},0);
-};
-window.setCat=async(contaId,catId)=>{
-  const c=contas.find(x=>x.id===contaId);if(!c)return;
-  const mesmaDesc=contas.filter(x=>x.descricao===c.descricao);
-  if(mesmaDesc.length>1){for(const x of mesmaDesc){await updateDoc(doc(db,'contas',x.id),{catId:catId||''});x.catId=catId||'';}toast('Categoria aplicada a '+mesmaDesc.length+' lançamentos.');}
-  else{await updateDoc(doc(db,'contas',contaId),{catId:catId||''});c.catId=catId||'';}
-  render();
 };
 
 window.openBaixa=id=>{baixaId=id;const c=contas.find(x=>x.id===id);document.getElementById('baixa-inf').textContent=c.descricao+' · '+fmt(c.valor)+' · Venc. '+fmtD(c.vencimento);document.getElementById('b-val').value=c.valor;document.getElementById('b-dt').value=iso(hoje);document.getElementById('b-forma').value=c.forma||'boleto';document.getElementById('m-baixa').classList.add('open');};

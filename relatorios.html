@@ -194,7 +194,7 @@ tbody tr:hover{background:#fafaf7}
         </div>
         <div style="overflow-x:auto">
           <table>
-            <thead><tr><th>Vencimento</th><th>Descrição</th><th>Categoria</th><th>Status</th><th style="text-align:right">Valor</th><th style="text-align:right">Pago</th></tr></thead>
+            <thead><tr><th>Vencimento</th><th>Descrição</th><th>Tipo</th><th>Status</th><th style="text-align:right">Valor</th><th style="text-align:right">Pago</th></tr></thead>
             <tbody id="tbl-rel"></tbody>
           </table>
           <div class="empty" id="tbl-em" style="display:none">Nenhum registro encontrado.</div>
@@ -224,9 +224,7 @@ const ml=d=>d.toLocaleDateString('pt-BR',{month:'short',year:'2-digit'});
 let hoje=new Date();hoje.setHours(0,0,0,0);
 const diff=s=>Math.round((hoje-new Date(s+'T00:00:00'))/86400000);
 const st=c=>{if(c.status==='pago'||c.status==='cancelado')return c.status;return diff(c.vencimento)>0?'atrasado':'pendente';};
-const gc=id=>cats.find(c=>c.id===id)||null;
-
-let contas=[],cats=[],chM,chC,chF;
+let contas=[],chM,chC,chF;
 
 window.sair=()=>signOut(auth).then(()=>window.location.href='index.html');
 
@@ -245,9 +243,8 @@ onAuthStateChanged(auth,async user=>{
 });
 
 async function load(){
-  const [csn,ksn]=await Promise.all([getDocs(collection(db,'contas')),getDocs(collection(db,'categorias'))]);
+  const csn=await getDocs(collection(db,'contas'));
   contas=[];csn.forEach(d=>contas.push({id:d.id,...d.data()}));
-  cats=[];ksn.forEach(d=>cats.push({id:d.id,...d.data()}));
   fillMeses();
   atualizar();
   await carregarMovimento();
@@ -394,15 +391,15 @@ function tabela(l){
   const SB={pago:'bdg-s',atrasado:'bdg-d',pendente:'bdg-w',cancelado:'bdg-i'};
   const SL={pago:'Pago',atrasado:'Atrasado',pendente:'Pendente',cancelado:'Cancelado'};
   tb.innerHTML=s.map(c=>{
-    const s2=st(c);const cat=c.catId?gc(c.catId):null;
-    return `<tr><td>${fmtD(c.vencimento)}</td><td>${esc(c.descricao)}</td><td>${cat?`<span style="display:inline-flex;align-items:center;gap:5px"><span class="dot" style="background:${cat.cor}"></span>${esc(cat.nome)}</span>`:'—'}</td><td><span class="bdg ${SB[s2]}">${SL[s2]}</span></td><td style="text-align:right;font-weight:500">${fmt(c.valor)}</td><td style="text-align:right;color:${c.valorPago>0?'var(--grn)':'var(--tx3)'}">${c.valorPago>0?fmt(c.valorPago):'—'}</td></tr>`;
+    const s2=st(c);const tipoLabel=c.tipoDespesa==='variavel'?'<span class="bdg bdg-w">Variável</span>':'<span class="bdg bdg-i">Fixa</span>';
+    return `<tr><td>${fmtD(c.vencimento)}</td><td>${esc(c.descricao)}</td><td>${tipoLabel}</td><td><span class="bdg ${SB[s2]}">${SL[s2]}</span></td><td style="text-align:right;font-weight:500">${fmt(c.valor)}</td><td style="text-align:right;color:${c.valorPago>0?'var(--grn)':'var(--tx3)'}">${c.valorPago>0?fmt(c.valorPago):'—'}</td></tr>`;
   }).join('');
 }
 
 window.exportRelCSV=()=>{
   const l=filtrar();
   const rows=[['Vencimento','Descrição','Categoria','Status','Valor','Valor Pago']];
-  l.forEach(c=>{const cat=c.catId?(gc(c.catId)||{nome:''}).nome:'';rows.push([c.vencimento,c.descricao,cat,st(c),c.valor.toFixed(2),(c.valorPago||0).toFixed(2)]);});
+  l.forEach(c=>{const tipoExp=c.tipoDespesa==='variavel'?'Variável':'Fixa';rows.push([c.vencimento,c.descricao,tipoExp,st(c),c.valor.toFixed(2),(c.valorPago||0).toFixed(2)]);});
   const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));a.download='relatorio-tally.csv';a.click();
 };
