@@ -296,13 +296,11 @@ window.reabrirDia=async(date,e)=>{
       if(day){
         day.status='open';
         await setDoc(doc(db,'movimento','data'),{financeData:JSON.stringify(data)});
-        // Atualizar movData e re-renderizar
-        movData=movData.map(d=>d.date===date?{...d,status:'open'}:d);
-        renderHist();
-        toast('Movimento de '+fmtD(date)+' aberto!','ok');
+        sessionStorage.setItem('mov_active_date',date);
+        window.location.href='movimento.html?reabrir=1';
       }
     }
-  }catch(e){console.error(e);}
+  }catch(err){console.error(err);}
 };
 </script>
 </body>

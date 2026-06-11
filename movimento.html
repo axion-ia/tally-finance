@@ -248,7 +248,12 @@ async function saveMovData(data){await setDoc(MOV_REF(),{financeData:JSON.string
 
 function processMovData(data){
   const today=getTodayStr();
-  data.forEach(d=>{if(d.status==='open'&&d.date!==today)d.status='closed';});
+  const activeDate=sessionStorage.getItem('mov_active_date')||today;
+  // Fecha dias open que não são nem hoje nem o dia ativo
+  data.forEach(d=>{
+    if(d.status==='open'&&d.date!==today&&d.date!==activeDate) d.status='closed';
+  });
+  // Cria o dia de hoje se não existir
   if(!data.find(d=>d.date===today))data.push({date:today,status:'open',incomes:[],dailyExpenses:[]});
   data.sort((a,b)=>a.date.localeCompare(b.date));
   let running=0,lastClosed='---';
@@ -263,9 +268,13 @@ function processMovData(data){
   return data;
 }
 
-const movAberto=()=>window._movData&&window._movData.find(d=>d.date===getTodayStr())?.status==='open';
+const movAberto=()=>{const activeDate=sessionStorage.getItem('mov_active_date')||getTodayStr();return window._movData&&window._movData.find(d=>d.date===activeDate)?.status==='open';};
+const getActiveDate=()=>sessionStorage.getItem('mov_active_date')||getTodayStr();
 
 async function iniciarMovimento(){
+  // Se não veio do reabrir, mostrar o dia atual
+  const params=new URLSearchParams(window.location.search);
+  if(!params.has('reabrir')) sessionStorage.removeItem('mov_active_date');
   let data=await getMovData();data=processMovData(data);await saveMovData(data);window._movData=data;
   renderMovimento();
   onSnapshot(MOV_REF(),snap=>{
@@ -275,12 +284,20 @@ async function iniciarMovimento(){
 }
 
 function renderMovimento(){
-  const data=window._movData||[];const today=data.find(d=>d.date===getTodayStr());if(!today)return;
+  const data=window._movData||[];
+  const activeDate=getActiveDate();
+  const today=data.find(d=>d.date===activeDate);if(!today)return;
   const isOpen=today.status==='open';
+  // Atualiza breadcrumb com a data ativa
+  document.querySelector('.bc').innerHTML=`Financeiro › <b>Movimento — ${fmtD(activeDate)}</b>`;
   document.getElementById('mov-badge').innerHTML=`<span class="${isOpen?'bo':'bc2'}">${isOpen?'Aberto':'Fechado'}</span>`;
   document.getElementById('mov-saldo').textContent=fmt(today.previousBalance||0);
   document.getElementById('mov-saldo').className='val'+(today.previousBalance<0?' neg':'');
-  document.getElementById('mov-ref').textContent=today.referenceDate&&today.referenceDate!=='---'?fmtD(today.referenceDate):'—';
+  // Referência = dia anterior fechado
+  const sorted=[...data].sort((a,b)=>a.date.localeCompare(b.date));
+  const idx=sorted.findIndex(d=>d.date===activeDate);
+  const anterior=sorted.slice(0,idx).reverse().find(d=>d.status==='closed');
+  document.getElementById('mov-ref').textContent=anterior?fmtD(anterior.date):'—';
   document.getElementById('sb-encerrar').style.display=isOpen?'block':'none';
   ['inc-desc','inc-val','nd-desc','nd-val','dd-desc','dd-val'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=!isOpen;});
   ['btn-add-inc','btn-nd','btn-dd'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=!isOpen;});
@@ -310,16 +327,16 @@ function renderMovimento(){
 }
 
 window.toggleEI=i=>{document.getElementById('eb-'+i).classList.toggle('open');document.getElementById('ec-'+i).classList.toggle('open');};
-window.encerrarMovimento=async()=>{if(!confirm('Encerrar o movimento do dia?'))return;let data=window._movData||[];const today=data.find(d=>d.date===getTodayStr());if(today){today.status='closed';data=processMovData(data);await saveMovData(data);}};
+window.encerrarMovimento=async()=>{if(!confirm('Encerrar o movimento do dia?'))return;let data=window._movData||[];const today=data.find(d=>d.date===getActiveDate());if(today){today.status='closed';data=processMovData(data);await saveMovData(data);}};
 window.addND=()=>{const desc=document.getElementById('nd-desc').value.trim();const val=parseMask(document.getElementById('nd-val').value);if(!desc||val<=0)return;novasDesp.push({id:uid(),desc,val});document.getElementById('nd-desc').value='';document.getElementById('nd-val').value='';renderND();};
 window.rmND=id=>{novasDesp=novasDesp.filter(d=>d.id!==id);renderND();};
 function renderND(){document.getElementById('nd-list').innerHTML=novasDesp.map(d=>`<div class="li-m"><span class="li-nm">${d.desc}</span><span class="li-vl">${fmt(d.val)}</span><button class="btn-del" onclick="rmND('${d.id}')">&times;</button></div>`).join('');}
-window.addEntrada=async()=>{const desc=document.getElementById('inc-desc').value.trim();const val=parseMask(document.getElementById('inc-val').value);if(!desc||val<=0){alert('Preencha descrição e valor.');return;}let data=window._movData||[];const today=data.find(d=>d.date===getTodayStr());today.incomes.push({id:uid(),description:desc,value:val,linkedExpenses:novasDesp.map(d=>({id:d.id,description:d.desc,value:d.val}))});document.getElementById('inc-desc').value='';document.getElementById('inc-val').value='';novasDesp=[];renderND();data=processMovData(data);await saveMovData(data);};
-window.addLE=async incId=>{const desc=document.getElementById('le-desc-'+incId).value.trim();const val=parseMask(document.getElementById('le-val-'+incId).value);if(!desc||val<=0)return;let data=window._movData||[];const today=data.find(d=>d.date===getTodayStr());const inc=today.incomes.find(i=>i.id===incId);inc.linkedExpenses.push({id:uid(),description:desc,value:val});data=processMovData(data);await saveMovData(data);};
-window.addDD=async()=>{const desc=document.getElementById('dd-desc').value.trim();const val=parseMask(document.getElementById('dd-val').value);if(!desc||val<=0)return;let data=window._movData||[];const today=data.find(d=>d.date===getTodayStr());today.dailyExpenses.push({id:uid(),description:desc,value:val});document.getElementById('dd-desc').value='';document.getElementById('dd-val').value='';data=processMovData(data);await saveMovData(data);};
-window.rmInc=async id=>{let data=window._movData||[];const today=data.find(d=>d.date===getTodayStr());today.incomes=today.incomes.filter(i=>i.id!==id);data=processMovData(data);await saveMovData(data);};
-window.rmLE=async(incId,id)=>{let data=window._movData||[];const today=data.find(d=>d.date===getTodayStr());const inc=today.incomes.find(i=>i.id===incId);inc.linkedExpenses=inc.linkedExpenses.filter(le=>le.id!==id);data=processMovData(data);await saveMovData(data);};
-window.rmDD=async id=>{let data=window._movData||[];const today=data.find(d=>d.date===getTodayStr());today.dailyExpenses=today.dailyExpenses.filter(e=>e.id!==id);data=processMovData(data);await saveMovData(data);};
+window.addEntrada=async()=>{const desc=document.getElementById('inc-desc').value.trim();const val=parseMask(document.getElementById('inc-val').value);if(!desc||val<=0){alert('Preencha descrição e valor.');return;}let data=window._movData||[];const today=data.find(d=>d.date===getActiveDate());today.incomes.push({id:uid(),description:desc,value:val,linkedExpenses:novasDesp.map(d=>({id:d.id,description:d.desc,value:d.val}))});document.getElementById('inc-desc').value='';document.getElementById('inc-val').value='';novasDesp=[];renderND();data=processMovData(data);await saveMovData(data);};
+window.addLE=async incId=>{const desc=document.getElementById('le-desc-'+incId).value.trim();const val=parseMask(document.getElementById('le-val-'+incId).value);if(!desc||val<=0)return;let data=window._movData||[];const today=data.find(d=>d.date===getActiveDate());const inc=today.incomes.find(i=>i.id===incId);inc.linkedExpenses.push({id:uid(),description:desc,value:val});data=processMovData(data);await saveMovData(data);};
+window.addDD=async()=>{const desc=document.getElementById('dd-desc').value.trim();const val=parseMask(document.getElementById('dd-val').value);if(!desc||val<=0)return;let data=window._movData||[];const today=data.find(d=>d.date===getActiveDate());today.dailyExpenses.push({id:uid(),description:desc,value:val});document.getElementById('dd-desc').value='';document.getElementById('dd-val').value='';data=processMovData(data);await saveMovData(data);};
+window.rmInc=async id=>{let data=window._movData||[];const today=data.find(d=>d.date===getActiveDate());today.incomes=today.incomes.filter(i=>i.id!==id);data=processMovData(data);await saveMovData(data);};
+window.rmLE=async(incId,id)=>{let data=window._movData||[];const today=data.find(d=>d.date===getActiveDate());const inc=today.incomes.find(i=>i.id===incId);inc.linkedExpenses=inc.linkedExpenses.filter(le=>le.id!==id);data=processMovData(data);await saveMovData(data);};
+window.rmDD=async id=>{let data=window._movData||[];const today=data.find(d=>d.date===getActiveDate());today.dailyExpenses=today.dailyExpenses.filter(e=>e.id!==id);data=processMovData(data);await saveMovData(data);};
 window.reabrirDia=async date=>{if(!confirm(`Abrir movimento de ${fmtD(date)}?`))return;let data=window._movData||[];const day=data.find(d=>d.date===date);if(day){day.status='open';data=processMovData(data);await saveMovData(data);}};
 
 ;
