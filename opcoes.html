@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tally — Opções</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f5f3ef;--sf:#fff;--sf2:#f0ede8;--bd:rgba(0,0,0,.08);--bdm:rgba(0,0,0,.14);--tx:#1a1814;--tx2:#6b6560;--tx3:#a09a93;--green:#1a3a2a;--green2:#2d5e42;--red:#c94040;--red-bg:#fdf0f0;--ora:#b07020;--grn:#2d7a4f;--r:10px;--rs:6px;--sh:0 1px 3px rgba(0,0,0,.06);--mono:'Nunito',sans-serif}
+body{font-family:var(--mono);background:var(--bg);color:var(--tx);min-height:100vh;font-size:14px}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:220px;background:var(--green);display:flex;flex-direction:column;flex-shrink:0;min-height:100vh}
+.sb-brand{padding:0;border-bottom:1px solid rgba(255,255,255,.1)}
+.sb-nav{flex:1;padding-top:.75rem}
+.sb-sec{font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.08em;padding:10px 1.5rem 4px}
+.nav-a{display:flex;align-items:center;gap:9px;padding:9px 1.5rem;font-size:13px;font-family:var(--mono);color:rgba(255,255,255,.55);border-left:3px solid transparent;text-decoration:none;transition:all .15s}
+.nav-a:hover{color:rgba(255,255,255,.9);background:rgba(255,255,255,.06)}
+.nav-a.on{color:#fff;background:rgba(255,255,255,.1);border-left-color:rgba(255,255,255,.5)}
+.nav-a svg{flex-shrink:0;opacity:.7}
+.nav-sub{display:flex;align-items:center;gap:9px;padding:7px 1.5rem 7px 2.75rem;font-size:12px;font-family:var(--mono);color:rgba(255,255,255,.4);border-left:3px solid transparent;text-decoration:none;transition:all .15s}
+.nav-sub:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.04)}
+.nav-sub.on{color:rgba(255,255,255,.9);border-left-color:rgba(255,255,255,.3)}
+.nav-sub::before{content:'·';font-size:14px;opacity:.6}
+.sb-footer{padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.1)}
+.sb-email{font-size:11px;color:rgba(255,255,255,.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.sb-role{font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.btn-sair{width:100%;padding:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:6px;color:rgba(255,255,255,.6);font-size:11px;font-family:var(--mono);cursor:pointer}
+.btn-sair:hover{background:rgba(255,255,255,.15);color:#fff}
+.main{flex:1;overflow:auto}
+.topbar{background:var(--sf);border-bottom:1px solid var(--bd);padding:14px 28px;display:flex;align-items:center;justify-content:space-between}
+.tl .bc{font-size:12px;color:var(--tx3)}.tl .bc b{color:var(--tx);font-weight:500}
+.tl h1{font-size:18px;font-weight:500;margin-top:2px}
+.content{padding:24px 28px;max-width:800px}
+/* Cards de opção */
+.opt-section{margin-bottom:2rem}
+.opt-section h2{font-size:13px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bd)}
+.opt-card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:20px 24px;margin-bottom:12px;box-shadow:var(--sh);display:flex;align-items:center;gap:16px}
+.opt-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.opt-icon.green{background:#edf7f2}
+.opt-icon.red{background:var(--red-bg)}
+.opt-icon.blue{background:#eef4fd}
+.opt-icon.ora{background:#fdf5e8}
+.opt-info{flex:1}
+.opt-title{font-size:14px;font-weight:600;margin-bottom:3px}
+.opt-desc{font-size:12px;color:var(--tx3);line-height:1.5}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--rs);font-size:13px;cursor:pointer;border:none;font-family:var(--mono);transition:all .15s;font-weight:600}
+.btn-p{background:var(--green);color:#fff}.btn-p:hover{background:var(--green2)}
+.btn-d{background:var(--red);color:#fff}.btn-d:hover{background:#a83535}
+.btn-g{background:none;border:1px solid var(--bdm);color:var(--tx)}.btn-g:hover{background:var(--sf2)}
+.btn-b{background:#1e5fa8;color:#fff}.btn-b:hover{background:#174d8a}
+.btn-o{background:var(--ora);color:#fff}.btn-o:hover{background:#8f5a18}
+/* Importação */
+.upload-area{border:2px dashed var(--bdm);border-radius:var(--r);padding:2rem;text-align:center;cursor:pointer;transition:all .15s;background:var(--sf2);margin-top:12px}
+.upload-area:hover{border-color:var(--green);background:#f0f7f4}
+.upload-area.drag{border-color:var(--green);background:#f0f7f4}
+.upload-area p{font-size:13px;color:var(--tx3);margin-top:8px}
+.upload-area strong{color:var(--green)}
+/* Preview */
+.preview{margin-top:16px;background:var(--sf2);border-radius:var(--r);padding:16px;display:none}
+.preview h4{font-size:13px;font-weight:600;margin-bottom:8px}
+.preview-stats{display:flex;gap:16px;font-size:12px;color:var(--tx2);margin-bottom:12px}
+.preview-stats span strong{color:var(--tx)}
+/* Toast */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--tx);color:#fff;padding:10px 20px;border-radius:var(--r);font-size:13px;opacity:0;transition:all .3s;z-index:999;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.ok{background:var(--grn)}
+#toast.err{background:var(--red)}
+/* Modal confirm */
+.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:300;align-items:center;justify-content:center}.mbg.open{display:flex}
+.modal{background:var(--sf);border-radius:var(--r);padding:28px;width:400px;box-shadow:0 8px 32px rgba(0,0,0,.12)}
+.modal h3{font-size:16px;font-weight:600;margin-bottom:8px}
+.modal p{font-size:13px;color:var(--tx2);margin-bottom:20px;line-height:1.6}
+.mbtns{display:flex;gap:8px;justify-content:flex-end}
+.progress{height:6px;background:var(--sf2);border-radius:99px;overflow:hidden;margin-top:12px;display:none}
+.progress-bar{height:100%;background:var(--green);border-radius:99px;width:0;transition:width .3s}
+</style>
+</head>
+<body>
+<div id="loading" style="display:flex;align-items:center;justify-content:center;height:100vh;font-size:13px;color:#a09a93;font-family:'Nunito',sans-serif;background:#f5f3ef">Carregando...</div>
+<div class="layout" id="app" style="display:none">
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <a href="relatorios.html" style="display:block;text-decoration:none">
+        <img src="logo-tally.svg" style="width:100%;display:block"/>
+      </a>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-sec">Principal</div>
+      <a class="nav-a" href="relatorios.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Relatórios</a>
+      <div class="sb-sec">Financeiro</div>
+      <a class="nav-a" href="movimento.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Movimento</a>
+      <a class="nav-sub" href="historico.html">Histórico</a>
+      <a class="nav-a" href="contas.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Contas a Pagar</a>
+      <div class="sb-sec">Cadastros</div>
+      <a class="nav-a" href="fornecedores.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Fornecedores</a>
+      <div class="sb-sec">Admin</div>
+      <a class="nav-a" href="usuarios.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Usuários</a>
+      <a class="nav-a on" href="opcoes.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Opções</a>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-role" id="sb-role">—</div>
+      <div class="sb-email" id="sb-nome"></div>
+      <div style="font-size:10px;color:rgba(255,255,255,.3);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="sb-email">—</div>
+      <button class="btn-sair" onclick="sair()">Sair</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="tl"><div class="bc">Admin › <b>Opções</b></div><h1>Opções do Sistema</h1></div>
+    </div>
+    <div class="content">
+
+      <!-- Importação -->
+      <div class="opt-section">
+        <h2>Importação</h2>
+        <div class="opt-card">
+          <div class="opt-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="#2d7a4f" stroke-width="2" width="22" height="22"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+          <div class="opt-info">
+            <div class="opt-title">Importar CSV do Quitaê</div>
+            <div class="opt-desc">Importe o histórico de contas exportado do Quitaê. Os campos compatíveis serão importados automaticamente. A categoria será ignorada.</div>
+          </div>
+        </div>
+        <div class="upload-area" id="upload-area" onclick="document.getElementById('csv-input').click()" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="drop(event)">
+          <svg viewBox="0 0 48 48" fill="none" stroke="#a09a93" stroke-width="1.5" width="40" height="40"><path d="M28 4H12a4 4 0 00-4 4v32a4 4 0 004 4h24a4 4 0 004-4V20L28 4z"/><polyline points="28 4 28 20 44 20"/><line x1="24" y1="28" x2="24" y2="36"/><polyline points="20 32 24 28 28 32"/></svg>
+          <p><strong>Clique para selecionar</strong> ou arraste o arquivo CSV aqui</p>
+          <p style="font-size:11px;margin-top:4px">Arquivo exportado do Quitaê (.csv)</p>
+        </div>
+        <input type="file" id="csv-input" accept=".csv" style="display:none" onchange="lerCSV(event)"/>
+        <div class="preview" id="preview">
+          <h4>Preview da importação</h4>
+          <div class="preview-stats" id="preview-stats"></div>
+          <div class="progress" id="progress"><div class="progress-bar" id="progress-bar"></div></div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="btn btn-p" id="btn-import" onclick="importar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Importar</button>
+            <button class="btn btn-g" onclick="cancelarImport()">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Backup -->
+      <div class="opt-section">
+        <h2>Backup</h2>
+        <div class="opt-card">
+          <div class="opt-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="#1e5fa8" stroke-width="2" width="22" height="22"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+          <div class="opt-info">
+            <div class="opt-title">Exportar Backup</div>
+            <div class="opt-desc">Baixa todos os dados do sistema (contas, fornecedores, movimento) em formato JSON para backup seguro.</div>
+          </div>
+          <button class="btn btn-b" onclick="exportarBackup()">Exportar JSON</button>
+        </div>
+        <div class="opt-card">
+          <div class="opt-icon ora"><svg viewBox="0 0 24 24" fill="none" stroke="#b07020" stroke-width="2" width="22" height="22"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+          <div class="opt-info">
+            <div class="opt-title">Restaurar Backup</div>
+            <div class="opt-desc">Restaura os dados a partir de um arquivo JSON exportado anteriormente. Os dados atuais serão substituídos.</div>
+          </div>
+          <button class="btn btn-o" onclick="document.getElementById('json-input').click()">Restaurar JSON</button>
+          <input type="file" id="json-input" accept=".json" style="display:none" onchange="restaurarBackup(event)"/>
+        </div>
+      </div>
+
+      <!-- Limpeza -->
+      <div class="opt-section">
+        <h2>Limpeza de Dados</h2>
+        <div class="opt-card">
+          <div class="opt-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="#c94040" stroke-width="2" width="22" height="22"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></div>
+          <div class="opt-info">
+            <div class="opt-title">Limpar Todos os Lançamentos</div>
+            <div class="opt-desc">Remove todas as contas a pagar do sistema. Esta ação não pode ser desfeita.</div>
+          </div>
+          <button class="btn btn-d" onclick="confirmar('contas')">Limpar</button>
+        </div>
+        <div class="opt-card">
+          <div class="opt-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="#c94040" stroke-width="2" width="22" height="22"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></div>
+          <div class="opt-info">
+            <div class="opt-title">Limpar Histórico de Movimento</div>
+            <div class="opt-desc">Zera todo o histórico de movimento do sistema. Esta ação não pode ser desfeita.</div>
+          </div>
+          <button class="btn btn-d" onclick="confirmar('movimento')">Limpar</button>
+        </div>
+        <div class="opt-card">
+          <div class="opt-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="#c94040" stroke-width="2" width="22" height="22"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></div>
+          <div class="opt-info">
+            <div class="opt-title">Limpar Fornecedores</div>
+            <div class="opt-desc">Remove todos os fornecedores cadastrados. Esta ação não pode ser desfeita.</div>
+          </div>
+          <button class="btn btn-d" onclick="confirmar('fornecedores')">Limpar</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal confirm -->
+<div class="mbg" id="m-confirm">
+  <div class="modal">
+    <h3 id="confirm-title">Confirmar</h3>
+    <p id="confirm-msg"></p>
+    <div class="mbtns">
+      <button class="btn btn-g" onclick="fecharConfirm()">Cancelar</button>
+      <button class="btn btn-d" id="btn-confirm" onclick="executarLimpeza()">Confirmar</button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {apiKey:"AIzaSyBbE4c5VA08a2F3jF0nVDivSgCtIeCuqKg",authDomain:"tally-finance.firebaseapp.com",projectId:"tally-finance",storageBucket:"tally-finance.firebasestorage.app",messagingSenderId:"118325290738",appId:"1:118325290738:web:0d30137db3b6ea58e8d26b"};
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+const ADMIN='doug.alveslisboa@gmail.com';
+
+const toast=(msg,tipo)=>{const t=document.getElementById('toast');t.textContent=msg;t.className='show '+(tipo||'');clearTimeout(t._t);t._t=setTimeout(()=>t.className='',3000);};
+
+window.sair=()=>signOut(auth).then(()=>window.location.href='index.html');
+
+onAuthStateChanged(auth,async user=>{
+  if(!user){window.location.href='index.html';return;}
+  if(user.email!==ADMIN){window.location.href='relatorios.html';return;}
+  document.getElementById('sb-email').textContent=user.email;
+  document.getElementById('sb-role').textContent='Administrador';
+  try{const uSnap=await getDoc(doc(db,'users',user.uid));if(uSnap.exists()&&uSnap.data().nome)document.getElementById('sb-nome').textContent=uSnap.data().nome;}catch(e){}
+  document.getElementById('loading').style.display='none';
+  document.getElementById('app').style.display='flex';
+});
+
+// ── Importação CSV ──────────────────────────────────────────
+let csvLinhas=[];
+
+window.dragOver=e=>{e.preventDefault();document.getElementById('upload-area').classList.add('drag');};
+window.dragLeave=e=>document.getElementById('upload-area').classList.remove('drag');
+window.drop=e=>{e.preventDefault();document.getElementById('upload-area').classList.remove('drag');const f=e.dataTransfer.files[0];if(f)processarArquivo(f);};
+window.lerCSV=e=>{const f=e.target.files[0];if(f)processarArquivo(f);};
+
+function processarArquivo(file){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const text=e.target.result;
+    const lines=text.split('\n').map(l=>l.trim()).filter(l=>l);
+    if(!lines.length){toast('Arquivo vazio.',err);return;}
+    const header=lines[0].split(',').map(h=>h.replace(/"/g,'').trim().toLowerCase());
+    csvLinhas=lines.slice(1).map(line=>{
+      const vals=line.match(/(".*?"|[^,]+)(?=,|$)/g)||line.split(',');
+      const obj={};
+      header.forEach((h,i)=>{obj[h]=(vals[i]||'').replace(/"/g,'').trim();});
+      return obj;
+    }).filter(r=>r.descricao||r['descrição']||r.description);
+    
+    const preview=document.getElementById('preview');
+    preview.style.display='block';
+    const stats=document.getElementById('preview-stats');
+    const total=csvLinhas.length;
+    const pagos=csvLinhas.filter(r=>(r.status||'').toLowerCase()==='pago').length;
+    const pendentes=total-pagos;
+    stats.innerHTML=`<span><strong>${total}</strong> registros encontrados</span><span><strong>${pagos}</strong> pagos</span><span><strong>${pendentes}</strong> pendentes/atrasados</span>`;
+  };
+  reader.readAsText(file,'UTF-8');
+}
+
+window.cancelarImport=()=>{csvLinhas=[];document.getElementById('preview').style.display='none';document.getElementById('csv-input').value='';};
+
+window.importar=async()=>{
+  if(!csvLinhas.length){toast('Nenhum dado para importar.',err);return;}
+  const btn=document.getElementById('btn-import');
+  btn.disabled=true;btn.textContent='Importando...';
+  const prog=document.getElementById('progress');const bar=document.getElementById('progress-bar');
+  prog.style.display='block';bar.style.width='0%';
+  
+  let ok=0;
+  for(let i=0;i<csvLinhas.length;i++){
+    const r=csvLinhas[i];
+    // Mapear campos do Quitaê para o Tally
+    const desc=r.descricao||r['descrição']||r.description||'';
+    const valor=parseFloat((r.valor||r.value||'0').replace(',','.').replace(/[^\d.]/g,''))||0;
+    const venc=r.vencimento||r['vencimento']||r.due_date||'';
+    const status=(r.status||'pendente').toLowerCase();
+    const fornecedor=r.fornecedor||r.supplier||'';
+    const tipo=(r.tipo||r.type||'fixa').toLowerCase();
+    const tipoDespesa=tipo.includes('var')?'variavel':'fixa';
+    const valorPago=parseFloat((r['valor pago']||r.paid||'0').replace(',','.').replace(/[^\d.]/g,''))||0;
+    
+    if(!desc||!venc||!valor)continue;
+    
+    try{
+      await addDoc(collection(db,'contas'),{
+        descricao:desc,valor,vencimento:venc,status:status==='pago'?'pago':'pendente',
+        valorPago,fornecedor,tipoDespesa,numParcela:1,totalParcelas:1,
+        importado:true,createdAt:new Date().toISOString()
+      });
+      ok++;
+    }catch(e){}
+    
+    bar.style.width=Math.round((i+1)/csvLinhas.length*100)+'%';
+  }
+  
+  btn.disabled=false;btn.textContent='Importar';
+  prog.style.display='none';
+  document.getElementById('preview').style.display='none';
+  csvLinhas=[];
+  document.getElementById('csv-input').value='';
+  toast(`${ok} registros importados com sucesso!`,'ok');
+};
+
+// ── Backup ──────────────────────────────────────────────────
+window.exportarBackup=async()=>{
+  toast('Gerando backup...');
+  try{
+    const [csn,fsn,msn]=await Promise.all([
+      getDocs(collection(db,'contas')),
+      getDocs(collection(db,'fornecedores')),
+      getDoc(doc(db,'movimento','data'))
+    ]);
+    const backup={
+      versao:'1.0',data:new Date().toISOString(),
+      contas:csn.docs.map(d=>({id:d.id,...d.data()})),
+      fornecedores:fsn.docs.map(d=>({id:d.id,...d.data()})),
+      movimento:msn.exists()?msn.data():{}
+    };
+    const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=`tally-backup-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    toast('Backup exportado!','ok');
+  }catch(e){toast('Erro ao exportar.','err');}
+};
+
+window.restaurarBackup=async e=>{
+  const file=e.target.files[0];if(!file)return;
+  if(!confirm('Restaurar o backup substituirá TODOS os dados atuais. Confirma?')){e.target.value='';return;}
+  toast('Restaurando...');
+  try{
+    const text=await file.text();
+    const backup=JSON.parse(text);
+    // Limpar contas
+    const csn=await getDocs(collection(db,'contas'));
+    for(const d of csn.docs)await deleteDoc(doc(db,'contas',d.id));
+    // Reimportar contas
+    for(const c of backup.contas||[]){const{id,...data}=c;await addDoc(collection(db,'contas'),data);}
+    // Limpar fornecedores
+    const fsn=await getDocs(collection(db,'fornecedores'));
+    for(const d of fsn.docs)await deleteDoc(doc(db,'fornecedores',d.id));
+    // Reimportar fornecedores
+    for(const f of backup.fornecedores||[]){const{id,...data}=f;await addDoc(collection(db,'fornecedores'),data);}
+    // Restaurar movimento
+    if(backup.movimento)await setDoc(doc(db,'movimento','data'),backup.movimento);
+    toast('Backup restaurado com sucesso!','ok');
+    e.target.value='';
+  }catch(e){toast('Erro ao restaurar. Verifique o arquivo.','err');}
+};
+
+// ── Limpeza ─────────────────────────────────────────────────
+let tipoLimpeza='';
+const msgs={
+  contas:{title:'Limpar Todos os Lançamentos',msg:'Todos os lançamentos de contas a pagar serão excluídos permanentemente. Esta ação não pode ser desfeita.'},
+  movimento:{title:'Limpar Histórico de Movimento',msg:'Todo o histórico de movimento será apagado permanentemente. Esta ação não pode ser desfeita.'},
+  fornecedores:{title:'Limpar Fornecedores',msg:'Todos os fornecedores cadastrados serão excluídos permanentemente. Esta ação não pode ser desfeita.'},
+};
+
+window.confirmar=tipo=>{
+  tipoLimpeza=tipo;
+  document.getElementById('confirm-title').textContent=msgs[tipo].title;
+  document.getElementById('confirm-msg').textContent=msgs[tipo].msg;
+  document.getElementById('m-confirm').classList.add('open');
+};
+window.fecharConfirm=()=>{document.getElementById('m-confirm').classList.remove('open');tipoLimpeza='';};
+window.executarLimpeza=async()=>{
+  fecharConfirm();
+  toast('Limpando...');
+  try{
+    if(tipoLimpeza==='contas'){
+      const snap=await getDocs(collection(db,'contas'));
+      for(const d of snap.docs)await deleteDoc(doc(db,'contas',d.id));
+      toast('Todos os lançamentos foram removidos.','ok');
+    }else if(tipoLimpeza==='movimento'){
+      await setDoc(doc(db,'movimento','data'),{financeData:'[]'});
+      toast('Histórico de movimento limpo.','ok');
+    }else if(tipoLimpeza==='fornecedores'){
+      const snap=await getDocs(collection(db,'fornecedores'));
+      for(const d of snap.docs)await deleteDoc(doc(db,'fornecedores',d.id));
+      toast('Todos os fornecedores foram removidos.','ok');
+    }
+  }catch(e){toast('Erro ao limpar dados.','err');}
+};
+
+document.getElementById('m-confirm').addEventListener('click',e=>{if(e.target===document.getElementById('m-confirm'))fecharConfirm();});
+</script>
+</body>
+</html>
