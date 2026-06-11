@@ -4,10 +4,10 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Tally — Entrar</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--green:#1a3a2a;--green2:#2d5e42;--green3:#0f2318;--gold:#b8963e;--bg:#f5f3ef;--sf:#fff;--bd:#ddd9d2;--tx:#1a1814;--tx2:#6b6560;--tx3:#a09a93;--red:#8b2020;--mono:'IBM Plex Mono',monospace}
+:root{--green:#1a3a2a;--green2:#2d5e42;--green3:#0f2318;--gold:#b8963e;--bg:#f5f3ef;--sf:#fff;--bd:#ddd9d2;--tx:#1a1814;--tx2:#6b6560;--tx3:#a09a93;--red:#8b2020;--mono:'Nunito',monospace}
 body{font-family:var(--mono);min-height:100vh;display:flex;background:var(--bg)}
 
 /* ── Lado esquerdo ── */
@@ -201,7 +201,7 @@ h2{font-size:18px;font-weight:600;color:var(--tx);margin-bottom:6px}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {apiKey:"AIzaSyBbE4c5VA08a2F3jF0nVDivSgCtIeCuqKg",authDomain:"tally-finance.firebaseapp.com",projectId:"tally-finance",storageBucket:"tally-finance.firebasestorage.app",messagingSenderId:"118325290738",appId:"1:118325290738:web:0d30137db3b6ea58e8d26b"};
@@ -211,9 +211,16 @@ const db=getFirestore(app);
 
 onAuthStateChanged(auth,async user=>{
   if(user){
-    const snap=await getDoc(doc(db,'users',user.uid));
-    if(snap.exists()&&snap.data().primeiroAcesso===true) window.location.href='trocar-senha.html';
-    else window.location.href='relatorios.html';
+    try{
+      const snap=await getDoc(doc(db,'users',user.uid));
+      if(snap.exists()&&snap.data().ativo===false){
+        await signOut(auth);return;
+      }
+      if(snap.exists()&&snap.data().primeiroAcesso===true) window.location.href='trocar-senha.html';
+      else window.location.href='relatorios.html';
+    }catch(e){
+      window.location.href='relatorios.html';
+    }
   }
 });
 
@@ -242,7 +249,7 @@ window.entrar=async()=>{
     const cred=await signInWithEmailAndPassword(auth,email,senha);
     const snap=await getDoc(doc(db,'users',cred.user.uid));
     if(snap.exists()&&snap.data().ativo===false){
-      await auth.signOut();
+      await signOut(auth);
       mostrarErro('Acesso desativado. Entre em contato com o administrador.');
       btn.disabled=false;btn.textContent='Entrar';return;
     }
