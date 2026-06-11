@@ -290,17 +290,19 @@ window.reabrirDia=async(date,e)=>{
   if(!confirm(`Abrir movimento de ${fmtD(date)}?`))return;
   try{
     const snap=await getDoc(doc(db,'movimento','data'));
-    if(snap.exists()){
-      const data=JSON.parse(snap.data().financeData||'[]');
-      const day=data.find(d=>d.date===date);
-      if(day){
-        day.status='open';
-        await setDoc(doc(db,'movimento','data'),{financeData:JSON.stringify(data)});
-        sessionStorage.setItem('mov_active_date',date);
-        window.location.href='movimento.html?reabrir=1';
-      }
+    let data=snap.exists()?JSON.parse(snap.data().financeData||'[]'):[];
+    let day=data.find(d=>d.date===date);
+    if(!day){
+      // Dia não existe no Firestore ainda, criar
+      day={date,status:'open',incomes:[],dailyExpenses:[]};
+      data.push(day);
+    } else {
+      day.status='open';
     }
-  }catch(err){console.error(err);}
+    await setDoc(doc(db,'movimento','data'),{financeData:JSON.stringify(data)});
+    sessionStorage.setItem('mov_active_date',date);
+    window.location.href='movimento.html?reabrir=1';
+  }catch(err){console.error(err);toast('Erro ao abrir movimento.','err');}
 };
 </script>
 </body>
