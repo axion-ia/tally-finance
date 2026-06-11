@@ -393,18 +393,21 @@ const msgs={
 
 window.confirmar=async tipo=>{
   tipoLimpeza=tipo;
-  document.getElementById('confirm-title').textContent=msgs[tipo].title;
+  let msg='';
   if(tipo==='contas'){
     const ano=document.getElementById('limpar-ano').value;
     const mes=document.getElementById('limpar-mes').value;
-    const periodo=mes==='todos'?`o ano ${ano}`:`${['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][parseInt(mes)]} de ${ano}`;
-    document.getElementById('confirm-msg').textContent=`Os lançamentos de ${periodo} serão excluídos permanentemente. Esta ação não pode ser desfeita.`;
-  }else{
-    document.getElementById('confirm-msg').textContent=msgs[tipo].msg;
+    const meses=['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const periodo=mes==='todos'?`o ano ${ano}`:`${meses[parseInt(mes)]} de ${ano}`;
+    msg=`Confirma exclusão dos lançamentos de ${periodo}?`;
+  }else if(tipo==='movimento'){
+    msg='Confirma limpeza do histórico de movimento? Esta ação não pode ser desfeita.';
+  }else if(tipo==='fornecedores'){
+    msg='Confirma exclusão de todos os fornecedores? Esta ação não pode ser desfeita.';
   }
-  document.getElementById('m-confirm').classList.add('open');
+  if(!confirm(msg))return;
+  await window.executarLimpeza();
 };
-window.fecharConfirm=()=>{document.getElementById('m-confirm').classList.remove('open');tipoLimpeza='';};
 window.executarLimpeza=async()=>{
   fecharConfirm();
   toast('Limpando...','');
