@@ -118,8 +118,7 @@ body{font-family:var(--mono);background:var(--bg);color:var(--tx);min-height:100
         <div class="opt-card">
           <div class="opt-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="#2d7a4f" stroke-width="2" width="22" height="22"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
           <div class="opt-info">
-            <div class="opt-title">Importar CSV do Quitaê</div>
-            <div class="opt-desc">Importe o histórico de contas exportado do Quitaê. Os campos compatíveis serão importados automaticamente. A categoria será ignorada.</div>
+            <div class="opt-title">Importar CSV</div>
           </div>
         </div>
         <div class="upload-area" id="upload-area" onclick="document.getElementById('csv-input').click()" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="drop(event)">
@@ -164,11 +163,21 @@ body{font-family:var(--mono);background:var(--bg);color:var(--tx);min-height:100
       <!-- Limpeza -->
       <div class="opt-section">
         <h2>Limpeza de Dados</h2>
-        <div class="opt-card">
+        <div class="opt-card" style="flex-wrap:wrap;gap:12px">
           <div class="opt-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="#c94040" stroke-width="2" width="22" height="22"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></div>
           <div class="opt-info">
-            <div class="opt-title">Limpar Todos os Lançamentos</div>
-            <div class="opt-desc">Remove todas as contas a pagar do sistema. Esta ação não pode ser desfeita.</div>
+            <div class="opt-title">Limpar Lançamentos</div>
+            <div class="opt-desc">Remove as contas a pagar do período selecionado. Esta ação não pode ser desfeita.</div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap">
+              <select id="limpar-ano" style="padding:0 10px;border:1px solid var(--bdm);border-radius:var(--rs);font-family:var(--mono);font-size:13px;color:var(--tx);background:var(--sf);outline:none;height:34px;cursor:pointer"></select>
+              <select id="limpar-mes" style="padding:0 10px;border:1px solid var(--bdm);border-radius:var(--rs);font-family:var(--mono);font-size:13px;color:var(--tx);background:var(--sf);outline:none;height:34px;cursor:pointer">
+                <option value="todos">Todos os Meses</option>
+                <option value="01">Janeiro</option><option value="02">Fevereiro</option><option value="03">Março</option>
+                <option value="04">Abril</option><option value="05">Maio</option><option value="06">Junho</option>
+                <option value="07">Julho</option><option value="08">Agosto</option><option value="09">Setembro</option>
+                <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+              </select>
+            </div>
           </div>
           <button class="btn btn-d" onclick="confirmar('contas')">Limpar</button>
         </div>
@@ -230,6 +239,7 @@ onAuthStateChanged(auth,async user=>{
   try{const uSnap=await getDoc(doc(db,'users',user.uid));if(uSnap.exists()&&uSnap.data().nome)document.getElementById('sb-nome').textContent=uSnap.data().nome;}catch(e){}
   document.getElementById('loading').style.display='none';
   document.getElementById('app').style.display='flex';
+  await popularAnos();
 });
 
 // ── Importação CSV ──────────────────────────────────────────
@@ -360,26 +370,41 @@ window.restaurarBackup=async e=>{
 // ── Limpeza ─────────────────────────────────────────────────
 let tipoLimpeza='';
 const msgs={
-  contas:{title:'Limpar Todos os Lançamentos',msg:'Todos os lançamentos de contas a pagar serão excluídos permanentemente. Esta ação não pode ser desfeita.'},
+  contas:{title:'Limpar Lançamentos',msg:''},
   movimento:{title:'Limpar Histórico de Movimento',msg:'Todo o histórico de movimento será apagado permanentemente. Esta ação não pode ser desfeita.'},
   fornecedores:{title:'Limpar Fornecedores',msg:'Todos os fornecedores cadastrados serão excluídos permanentemente. Esta ação não pode ser desfeita.'},
 };
 
-window.confirmar=tipo=>{
+window.confirmar=async tipo=>{
   tipoLimpeza=tipo;
   document.getElementById('confirm-title').textContent=msgs[tipo].title;
-  document.getElementById('confirm-msg').textContent=msgs[tipo].msg;
+  if(tipo==='contas'){
+    const ano=document.getElementById('limpar-ano').value;
+    const mes=document.getElementById('limpar-mes').value;
+    const periodo=mes==='todos'?`o ano ${ano}`:`${['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][parseInt(mes)]} de ${ano}`;
+    document.getElementById('confirm-msg').textContent=`Os lançamentos de ${periodo} serão excluídos permanentemente. Esta ação não pode ser desfeita.`;
+  }else{
+    document.getElementById('confirm-msg').textContent=msgs[tipo].msg;
+  }
   document.getElementById('m-confirm').classList.add('open');
 };
 window.fecharConfirm=()=>{document.getElementById('m-confirm').classList.remove('open');tipoLimpeza='';};
 window.executarLimpeza=async()=>{
-  fecharConfirm();
-  toast('Limpando...');
+  fecharConfirm();toast('Limpando...');
   try{
     if(tipoLimpeza==='contas'){
+      const ano=document.getElementById('limpar-ano').value;
+      const mes=document.getElementById('limpar-mes').value;
       const snap=await getDocs(collection(db,'contas'));
-      for(const d of snap.docs)await deleteDoc(doc(db,'contas',d.id));
-      toast('Todos os lançamentos foram removidos.','ok');
+      let count=0;
+      for(const d of snap.docs){
+        const venc=d.data().vencimento||'';
+        const vAnno=venc.slice(0,4);const vMes=venc.slice(5,7);
+        if(vAnno===ano&&(mes==='todos'||vMes===mes)){
+          await deleteDoc(doc(db,'contas',d.id));count++;
+        }
+      }
+      toast(`${count} lançamentos removidos.`,'ok');
     }else if(tipoLimpeza==='movimento'){
       await setDoc(doc(db,'movimento','data'),{financeData:'[]'});
       toast('Histórico de movimento limpo.','ok');
@@ -390,6 +415,18 @@ window.executarLimpeza=async()=>{
     }
   }catch(e){toast('Erro ao limpar dados.','err');}
 };
+
+// Popular seletor de ano
+async function popularAnos(){
+  const snap=await getDocs(collection(db,'contas'));
+  const anos=new Set();
+  snap.forEach(d=>{const v=d.data().vencimento;if(v)anos.add(v.slice(0,4));});
+  const anoAtual=String(new Date().getFullYear());
+  if(!anos.has(anoAtual))anos.add(anoAtual);
+  const sel=document.getElementById('limpar-ano');
+  [...anos].sort().forEach(a=>{const o=document.createElement('option');o.value=a;o.textContent=a;sel.appendChild(o);});
+  sel.value=anoAtual;
+}
 
 document.getElementById('m-confirm').addEventListener('click',e=>{if(e.target===document.getElementById('m-confirm'))fecharConfirm();});
 </script>

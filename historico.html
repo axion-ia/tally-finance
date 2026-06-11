@@ -112,9 +112,7 @@ body{font-family:var(--mono);background:var(--bg);color:var(--tx);min-height:100
       <div id="hist-list"><div class="loading">Carregando...</div></div>
     </div>
   </div>
-</div>
-
-<script type="module">
+<div id="toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a1814;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;opacity:0;transition:all .3s;z-index:999;white-space:nowrap"></div>
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -132,6 +130,8 @@ const getTodayStr=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.
 const getMesNome=s=>{const[y,m]=s.split('-');const d=new Date(y,parseInt(m)-1,1);const n=d.toLocaleString('pt-BR',{month:'long'});return n.charAt(0).toUpperCase()+n.slice(1)+' '+y;};
 
 let movData=[];
+
+const toast=(msg,tipo)=>{const t=document.getElementById('toast');t.textContent=msg;t.style.background=tipo==='ok'?'#2d7a4f':tipo==='err'?'#c94040':'#1a1814';t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';clearTimeout(t._t);t._t=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(80px)';},2800);};
 
 window.sair=()=>signOut(auth).then(()=>window.location.href='index.html');
 
@@ -283,17 +283,23 @@ window.limparFiltro=()=>{
 };
 
 window.reabrirDia=async(date,e)=>{
-  e.preventDefault();
+  if(e)e.preventDefault();
   if(!confirm(`Abrir movimento de ${fmtD(date)}?`))return;
   try{
     const snap=await getDoc(doc(db,'movimento','data'));
     if(snap.exists()){
       const data=JSON.parse(snap.data().financeData||'[]');
       const day=data.find(d=>d.date===date);
-      if(day){day.status='open';await setDoc(doc(db,'movimento','data'),{financeData:JSON.stringify(data)});}
+      if(day){
+        day.status='open';
+        await setDoc(doc(db,'movimento','data'),{financeData:JSON.stringify(data)});
+        // Atualizar movData e re-renderizar
+        movData=movData.map(d=>d.date===date?{...d,status:'open'}:d);
+        renderHist();
+        toast('Movimento de '+fmtD(date)+' aberto!','ok');
+      }
     }
   }catch(e){console.error(e);}
-  window.location.href='movimento.html';
 };
 </script>
 </body>
