@@ -406,21 +406,24 @@ window.confirmar=async tipo=>{
 };
 window.fecharConfirm=()=>{document.getElementById('m-confirm').classList.remove('open');tipoLimpeza='';};
 window.executarLimpeza=async()=>{
-  fecharConfirm();toast('Limpando...');
+  fecharConfirm();
+  const t=document.getElementById('toast');
+  t.textContent='Limpando...';t.className='show';
   try{
     if(tipoLimpeza==='contas'){
       const ano=document.getElementById('limpar-ano').value;
       const mes=document.getElementById('limpar-mes').value;
       const snap=await getDocs(collection(db,'contas'));
       let count=0;
-      for(const d of snap.docs){
-        const venc=d.data().vencimento||'';
-        const vAnno=venc.slice(0,4);const vMes=venc.slice(5,7);
-        if(vAnno===ano&&(mes==='todos'||vMes===mes)){
-          await deleteDoc(doc(db,'contas',d.id));count++;
-        }
-      }
-      toast(`${count} lançamentos removidos.`,'ok');
+      const dels=[];
+      snap.forEach(d=>{
+        const venc=(d.data().vencimento||'').trim();
+        const vAno=venc.slice(0,4);
+        const vMes=venc.slice(5,7);
+        if(vAno===ano&&(mes==='todos'||vMes===mes)) dels.push(d.id);
+      });
+      for(const id of dels){await deleteDoc(doc(db,'contas',id));count++;}
+      toast(`${count} lançamento(s) removido(s).`,'ok');
     }else if(tipoLimpeza==='movimento'){
       await setDoc(doc(db,'movimento','data'),{financeData:'[]'});
       toast('Histórico de movimento limpo.','ok');
@@ -429,7 +432,7 @@ window.executarLimpeza=async()=>{
       for(const d of snap.docs)await deleteDoc(doc(db,'fornecedores',d.id));
       toast('Todos os fornecedores foram removidos.','ok');
     }
-  }catch(e){toast('Erro ao limpar dados.','err');}
+  }catch(e){console.error(e);toast('Erro ao limpar dados.','err');}
 };
 
 // Popular seletor de ano
