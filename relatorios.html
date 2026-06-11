@@ -160,8 +160,16 @@ tbody tr:hover{background:#fafaf7}
       </div>
 
       <div class="fbar">
+        <label>Ano:</label>
+        <select class="fs" id="f-ano" onchange="onAnoMesChange()" style="min-width:90px"></select>
         <label>Mês:</label>
-        <select class="fs" id="f-mes" onchange="atualizar()" style="min-width:180px"><option value="todos">Todos os Meses</option></select>
+        <select class="fs" id="f-mes" onchange="onAnoMesChange()" style="min-width:130px">
+          <option value="todos">Todos</option>
+          <option value="01">Janeiro</option><option value="02">Fevereiro</option><option value="03">Março</option>
+          <option value="04">Abril</option><option value="05">Maio</option><option value="06">Junho</option>
+          <option value="07">Julho</option><option value="08">Agosto</option><option value="09">Setembro</option>
+          <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+        </select>
         <label>Status:</label>
         <select class="fs" id="f-st" onchange="atualizar()"><option value="todos">Todos</option><option value="pendente">Pendente</option><option value="atrasado">Atrasado</option><option value="pago">Pago</option></select>
       </div>
@@ -284,20 +292,19 @@ async function carregarMovimento(){
 }
 
 function fillMeses(){
-  const set={};contas.forEach(c=>{set[c.vencimento.slice(0,7)]=1;});
-  const meses=Object.keys(set).sort().reverse();
-  const sel=document.getElementById('f-mes');
-  sel.innerHTML='<option value="todos">Todos os Meses</option>';
-  meses.forEach(k=>{
-    const d=new Date(k+'-01T00:00:00');
-    const lbl=d.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
-    const o=document.createElement('option');o.value=k;o.textContent=lbl.charAt(0).toUpperCase()+lbl.slice(1);sel.appendChild(o);
-  });
-  const mesAtual=hoje.getFullYear()+'-'+String(hoje.getMonth()+1).padStart(2,'0');
-  if(meses.includes(mesAtual))sel.value=mesAtual;
+  const anos=[...new Set(contas.map(c=>c.vencimento.slice(0,4)))].sort().reverse();
+  const anoAtual=String(hoje.getFullYear());
+  if(!anos.includes(anoAtual))anos.push(anoAtual);
+  const selAno=document.getElementById('f-ano');
+  selAno.innerHTML=anos.map(a=>`<option value="${a}">${a}</option>`).join('');
+  selAno.value=anoAtual;
+  document.getElementById('f-mes').value=String(hoje.getMonth()+1).padStart(2,'0');
 }
 
+window.onAnoMesChange=()=>atualizar();
+
 function filtrar(){
+  const ano=document.getElementById('f-ano').value;
   const mes=document.getElementById('f-mes').value;
   const sv=document.getElementById('f-st').value;
   const data=document.getElementById('f-data').value;
@@ -306,7 +313,8 @@ function filtrar(){
   return contas.filter(c=>{
     const s2=st(c);
     if(data) return c.vencimento===data;
-    if(mes!=='todos'&&c.vencimento.slice(0,7)!==mes)return false;
+    if(mes==='todos'){if(c.vencimento.slice(0,4)!==ano)return false;}
+    else{const chave=ano+'-'+mes;if(c.vencimento.slice(0,7)!==chave)return false;}
     if(sv!=='todos'&&s2!==sv)return false;
     if(tipo!=='todos'&&(c.tipoDespesa||'fixa')!==tipo)return false;
     if(stTbl!=='todos'&&s2!==stTbl)return false;
@@ -317,13 +325,15 @@ function filtrar(){
 window.atualizar=()=>{const l=filtrar();kpis(l);chartMes(l);chartCat(l);aging(l);fluxo();tabela(l);};
 
 window.imprimir=()=>{
+  const ano=document.getElementById('f-ano').value;
   const mes=document.getElementById('f-mes').value;
   const data=document.getElementById('f-data').value;
   const info=document.getElementById('print-info');
+  const meses=['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   let txt='';
   if(data) txt=`Vencimento: ${fmtD(data)}`;
-  else if(mes!=='todos') txt=`Mês: ${document.getElementById('f-mes').options[document.getElementById('f-mes').selectedIndex].text}`;
-  else txt=`Todos os registros — ${new Date().toLocaleDateString('pt-BR')}`;
+  else if(mes!=='todos') txt=`${meses[parseInt(mes)]} de ${ano}`;
+  else txt=`${ano} — todos os meses`;
   info.textContent=txt;
   window.print();
 };
