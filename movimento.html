@@ -293,11 +293,10 @@ function renderMovimento(){
   document.getElementById('mov-badge').innerHTML=`<span class="${isOpen?'bo':'bc2'}">${isOpen?'Aberto':'Fechado'}</span>`;
   document.getElementById('mov-saldo').textContent=fmt(today.previousBalance||0);
   document.getElementById('mov-saldo').className='val'+(today.previousBalance<0?' neg':'');
-  // Referência = dia anterior fechado
-  const sorted=[...data].sort((a,b)=>a.date.localeCompare(b.date));
-  const idx=sorted.findIndex(d=>d.date===activeDate);
-  const anterior=sorted.slice(0,idx).reverse().find(d=>d.status==='closed');
-  document.getElementById('mov-ref').textContent=anterior?fmtD(anterior.date):'—';
+  // Referência = sempre o dia anterior no calendário
+  const dAtivo=new Date(activeDate+'T00:00:00');
+  dAtivo.setDate(dAtivo.getDate()-1);
+  document.getElementById('mov-ref').textContent=fmtD(iso(dAtivo));
   document.getElementById('sb-encerrar').style.display=isOpen?'block':'none';
   ['inc-desc','inc-val','nd-desc','nd-val','dd-desc','dd-val'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=!isOpen;});
   ['btn-add-inc','btn-nd','btn-dd'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=!isOpen;});
