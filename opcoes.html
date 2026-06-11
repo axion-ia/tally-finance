@@ -253,24 +253,41 @@ window.lerCSV=e=>{const f=e.target.files[0];if(f)processarArquivo(f);};
 function processarArquivo(file){
   const reader=new FileReader();
   reader.onload=e=>{
-    const text=e.target.result;
+    let text=e.target.result;
+    // Remover BOM
+    text=text.replace(/^\uFEFF/,'');
     const lines=text.split('\n').map(l=>l.trim()).filter(l=>l);
-    if(!lines.length){toast('Arquivo vazio.',err);return;}
-    const header=lines[0].split(',').map(h=>h.replace(/"/g,'').trim().toLowerCase());
+    if(!lines.length){toast('Arquivo vazio.','err');return;}
+
+    // Parser de CSV respeitando aspas
+    function parseCSVLine(line){
+      const vals=[];let cur='';let inQ=false;
+      for(let i=0;i<line.length;i++){
+        const ch=line[i];
+        if(ch==='"'){inQ=!inQ;}
+        else if(ch===','&&!inQ){vals.push(cur.trim());cur='';}
+        else cur+=ch;
+      }
+      vals.push(cur.trim());
+      return vals;
+    }
+
+    const header=parseCSVLine(lines[0]).map(h=>h.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''));
+    // header normalizado: vencimento, descricao, fornecedor, categoria, parcela, status, valor, valor pago
+
     csvLinhas=lines.slice(1).map(line=>{
-      const vals=line.match(/(".*?"|[^,]+)(?=,|$)/g)||line.split(',');
+      const vals=parseCSVLine(line);
       const obj={};
-      header.forEach((h,i)=>{obj[h]=(vals[i]||'').replace(/"/g,'').trim();});
+      header.forEach((h,i)=>{obj[h]=(vals[i]||'').trim();});
       return obj;
-    }).filter(r=>r.descricao||r['descrição']||r.description);
-    
+    }).filter(r=>r.descricao);
+
     const preview=document.getElementById('preview');
     preview.style.display='block';
-    const stats=document.getElementById('preview-stats');
     const total=csvLinhas.length;
-    const pagos=csvLinhas.filter(r=>(r.status||'').toLowerCase()==='pago').length;
+    const pagos=csvLinhas.filter(r=>r.status==='pago').length;
     const pendentes=total-pagos;
-    stats.innerHTML=`<span><strong>${total}</strong> registros encontrados</span><span><strong>${pagos}</strong> pagos</span><span><strong>${pendentes}</strong> pendentes/atrasados</span>`;
+    document.getElementById('preview-stats').innerHTML=`<span><strong>${total}</strong> registros encontrados</span><span><strong>${pagos}</strong> pagos</span><span><strong>${pendentes}</strong> pendentes</span>`;
   };
   reader.readAsText(file,'UTF-8');
 }
@@ -278,44 +295,43 @@ function processarArquivo(file){
 window.cancelarImport=()=>{csvLinhas=[];document.getElementById('preview').style.display='none';document.getElementById('csv-input').value='';};
 
 window.importar=async()=>{
-  if(!csvLinhas.length){toast('Nenhum dado para importar.',err);return;}
+  if(!csvLinhas.length){toast('Nenhum dado para importar.','err');return;}
   const btn=document.getElementById('btn-import');
   btn.disabled=true;btn.textContent='Importando...';
   const prog=document.getElementById('progress');const bar=document.getElementById('progress-bar');
   prog.style.display='block';bar.style.width='0%';
-  
+
   let ok=0;
   for(let i=0;i<csvLinhas.length;i++){
     const r=csvLinhas[i];
-    // Mapear campos do Quitaê para o Tally
-    const desc=r.descricao||r['descrição']||r.description||'';
-    const valor=parseFloat((r.valor||r.value||'0').replace(',','.').replace(/[^\d.]/g,''))||0;
-    const venc=r.vencimento||r['vencimento']||r.due_date||'';
-    const status=(r.status||'pendente').toLowerCase();
-    const fornecedor=r.fornecedor||r.supplier||'';
-    const tipo=(r.tipo||r.type||'fixa').toLowerCase();
-    const tipoDespesa=tipo.includes('var')?'variavel':'fixa';
-    const valorPago=parseFloat((r['valor pago']||r.paid||'0').replace(',','.').replace(/[^\d.]/g,''))||0;
-    
+    const desc=r.descricao||'';
+    const valor=parseFloat((r.valor||'0').replace(',','.'))||0;
+    const venc=r.vencimento||'';
+    const status=r.status==='pago'?'pago':'pendente';
+    const fornecedor=r.fornecedor||'';
+    const valorPago=parseFloat((r['valor pago']||'0').replace(',','.'))||0;
+    // Parcela: "4/4" → numParcela=4, totalParcelas=4
+    let numParcela=1,totalParcelas=1;
+    if(r.parcela&&r.parcela.includes('/')){
+      const[n,t]=r.parcela.split('/');
+      numParcela=parseInt(n)||1;totalParcelas=parseInt(t)||1;
+    }
     if(!desc||!venc||!valor)continue;
-    
     try{
       await addDoc(collection(db,'contas'),{
-        descricao:desc,valor,vencimento:venc,status:status==='pago'?'pago':'pendente',
-        valorPago,fornecedor,tipoDespesa,numParcela:1,totalParcelas:1,
+        descricao:desc,valor,vencimento:venc,status,valorPago,
+        fornecedor,tipoDespesa:'fixa',numParcela,totalParcelas,
         importado:true,createdAt:new Date().toISOString()
       });
       ok++;
     }catch(e){}
-    
     bar.style.width=Math.round((i+1)/csvLinhas.length*100)+'%';
   }
-  
+
   btn.disabled=false;btn.textContent='Importar';
   prog.style.display='none';
   document.getElementById('preview').style.display='none';
-  csvLinhas=[];
-  document.getElementById('csv-input').value='';
+  csvLinhas=[];document.getElementById('csv-input').value='';
   toast(`${ok} registros importados com sucesso!`,'ok');
 };
 
