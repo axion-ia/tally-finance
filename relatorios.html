@@ -292,7 +292,7 @@ async function carregarMovimento(){
 }
 
 function fillMeses(){
-  const anos=[...new Set(contas.map(c=>c.vencimento.slice(0,4)))].sort().reverse();
+  const anos=[...new Set(contas.map(c=>c.vencimento.slice(0,4)))].sort();
   const anoAtual=String(hoje.getFullYear());
   if(!anos.includes(anoAtual))anos.push(anoAtual);
   const selAno=document.getElementById('f-ano');
