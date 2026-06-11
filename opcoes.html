@@ -407,32 +407,39 @@ window.confirmar=async tipo=>{
 window.fecharConfirm=()=>{document.getElementById('m-confirm').classList.remove('open');tipoLimpeza='';};
 window.executarLimpeza=async()=>{
   fecharConfirm();
-  const t=document.getElementById('toast');
-  t.textContent='Limpando...';t.className='show';
+  toast('Limpando...','');
   try{
     if(tipoLimpeza==='contas'){
       const ano=document.getElementById('limpar-ano').value;
       const mes=document.getElementById('limpar-mes').value;
+      console.log('Limpando contas ano='+ano+' mes='+mes);
       const snap=await getDocs(collection(db,'contas'));
-      let count=0;
+      console.log('Total de contas no Firestore:'+snap.size);
       const dels=[];
       snap.forEach(d=>{
         const venc=(d.data().vencimento||'').trim();
-        const vAno=venc.slice(0,4);
-        const vMes=venc.slice(5,7);
+        const vAno=venc.substring(0,4);
+        const vMes=venc.substring(5,7);
+        console.log('Conta:'+venc+' vAno='+vAno+' vMes='+vMes+' match='+(vAno===ano&&(mes==='todos'||vMes===mes)));
         if(vAno===ano&&(mes==='todos'||vMes===mes)) dels.push(d.id);
       });
-      for(const id of dels){await deleteDoc(doc(db,'contas',id));count++;}
-      toast(`${count} lançamento(s) removido(s).`,'ok');
+      console.log('Para deletar:'+dels.length);
+      for(const id of dels) await deleteDoc(doc(db,'contas',id));
+      toast(dels.length+' lançamento(s) removido(s).','ok');
     }else if(tipoLimpeza==='movimento'){
       await setDoc(doc(db,'movimento','data'),{financeData:'[]'});
       toast('Histórico de movimento limpo.','ok');
     }else if(tipoLimpeza==='fornecedores'){
       const snap=await getDocs(collection(db,'fornecedores'));
-      for(const d of snap.docs)await deleteDoc(doc(db,'fornecedores',d.id));
-      toast('Todos os fornecedores foram removidos.','ok');
+      const dels=[];
+      snap.forEach(d=>dels.push(d.id));
+      for(const id of dels) await deleteDoc(doc(db,'fornecedores',id));
+      toast(dels.length+' fornecedor(es) removido(s).','ok');
     }
-  }catch(e){console.error(e);toast('Erro ao limpar dados.','err');}
+  }catch(e){
+    console.error('Erro limpeza:',e);
+    toast('Erro: '+e.message,'err');
+  }
 };
 
 // Popular seletor de ano
