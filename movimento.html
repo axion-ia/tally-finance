@@ -185,11 +185,12 @@ tbody tr:hover td{border-bottom-color:transparent}
 .btn-full{width:100%;padding:10px;background:var(--green);color:#fff;border:none;border-radius:var(--rs);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--mono);transition:background .15s}.btn-full:hover{background:var(--green2)}
 /* Resumo */
 .rl-lbl{font-size:13px;color:var(--tx2);font-weight:500}
-.rl-m{font-size:12px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--bg);display:flex;align-items:center;gap:8px}
-.rl-m::before{content:'';width:3px;height:13px;background:var(--gold);border-radius:2px;flex-shrink:0}
+.rl-m{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:2px solid var(--bd);margin-top:4px;font-size:13px;font-weight:700}
+.rl-m .rl-lbl{color:var(--tx);font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:.06em}
+.rl-m .rv{font-size:16px;font-weight:700;color:var(--grn)}
 .rr{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bd);font-size:13px}
 .rr:last-child{border-bottom:none}
-.rv{font-weight:700}
+.rv{font-weight:700;font-size:13px}
 /* Entradas expansíveis */
 .ei-h{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;box-shadow:var(--sh-sm);margin-bottom:8px;transition:background .12s}
 .ei-h:hover{background:var(--sf2)}
