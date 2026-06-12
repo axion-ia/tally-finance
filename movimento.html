@@ -163,7 +163,7 @@ tbody tr:hover td{border-bottom-color:transparent}
 .lbl{font-size:10px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;font-weight:700}
 .ref-lbl{font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;font-weight:700}
 .ref-val{font-size:13px;color:rgba(255,255,255,.7);font-weight:600}
-.mov-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.dia-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
 .mc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:18px;box-shadow:var(--sh-sm);margin-bottom:16px}
 .mc-t{font-size:12px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--bg);display:flex;align-items:center;gap:8px}
 .mc-t::before{content:'';width:3px;height:13px;background:var(--gold);border-radius:2px;flex-shrink:0}
@@ -182,9 +182,9 @@ tbody tr:hover td{border-bottom-color:transparent}
 .btn-plus:hover{background:var(--green);color:#fff;border-color:var(--green)}
 .btn-del{background:none;border:none;cursor:pointer;color:var(--tx3);padding:4px;border-radius:5px;font-size:16px;line-height:1;transition:all .12s}
 .btn-del:hover{background:var(--red-bg);color:var(--red)}
-.btn-full{width:100%}
+.btn-full{width:100%;padding:10px;background:var(--green);color:#fff;border:none;border-radius:var(--rs);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--mono);transition:background .15s}.btn-full:hover{background:var(--green2)}
 /* Resumo */
-.rl{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:18px;box-shadow:var(--sh-sm)}
+.rl-lbl{font-size:13px;color:var(--tx2);font-weight:500}
 .rl-m{font-size:12px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--bg);display:flex;align-items:center;gap:8px}
 .rl-m::before{content:'';width:3px;height:13px;background:var(--gold);border-radius:2px;flex-shrink:0}
 .rr{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bd);font-size:13px}
@@ -283,7 +283,7 @@ tbody tr:hover td{border-bottom-color:transparent}
         <div><div class="lbl">Saldo Anterior</div><div class="val" id="mov-saldo">R$ 0,00</div></div>
         <div><div class="ref-lbl">Referência</div><div class="ref-val" id="mov-ref">—</div></div>
       </div>
-      <div class="mov-grid">
+      <div class="dia-grid">
         <div>
           <div class="mc">
             <div class="mc-t">Nova Entrada</div>
@@ -317,10 +317,10 @@ tbody tr:hover td{border-bottom-color:transparent}
         <div>
           <div class="mc" style="position:sticky;top:1rem">
             <div class="mc-t">Resumo do Dia</div>
-            <div class="rr"><span class="rl">Total Entradas</span><span class="rv" id="r-ent">R$ 0,00</span></div>
-            <div class="rr"><span class="rl">Desp. Entradas</span><span class="rv" id="r-dent">R$ 0,00</span></div>
-            <div class="rr"><span class="rl">Desp. do Dia</span><span class="rv" id="r-ddia">R$ 0,00</span></div>
-            <div class="rl-m"><span class="rl">Líquido do Dia</span><span class="rv" id="r-liq">R$ 0,00</span></div>
+            <div class="rr"><span class="rl-lbl">Total Entradas</span><span class="rv" id="r-ent">R$ 0,00</span></div>
+            <div class="rr"><span class="rl-lbl">Desp. Entradas</span><span class="rv" id="r-dent">R$ 0,00</span></div>
+            <div class="rr"><span class="rl-lbl">Desp. do Dia</span><span class="rv" id="r-ddia">R$ 0,00</span></div>
+            <div class="rl-m"><span class="rl-lbl">Líquido do Dia</span><span class="rv" id="r-liq">R$ 0,00</span></div>
           </div>
         </div>
       </div>
