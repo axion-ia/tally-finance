@@ -192,15 +192,18 @@ tbody tr:hover td{border-bottom-color:transparent}
 .rr:last-child{border-bottom:none}
 .rv{font-weight:700;font-size:13px}
 /* Entradas expansíveis */
-.ei-h{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;box-shadow:var(--sh-sm);margin-bottom:4px;transition:background .12s;gap:8px}
+.ei-w{margin-bottom:12px}
+.ei-h{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:12px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:var(--sh-sm);transition:background .12s}
 .ei-h:hover{background:var(--sf2)}
-.ei-desc{font-size:13px;font-weight:600;color:var(--tx);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ei-desc{font-size:13px;font-weight:600;color:var(--tx);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ei-gross{font-size:13px;color:var(--grn);font-weight:700;flex-shrink:0}
 .ei-liq{font-size:12px;color:var(--tx3);font-weight:500;flex-shrink:0}
-.ei-chev{color:var(--tx3);font-size:16px;transition:transform .2s;flex-shrink:0}
+.ei-chev{color:var(--tx3);font-size:14px;transition:transform .2s;flex-shrink:0}
 .ei-chev.open{transform:rotate(180deg)}
-.ei-b{display:none;background:var(--sf2);border:1px solid var(--bd);border-top:none;border-radius:0 0 var(--r) var(--r);padding:10px 16px;margin-top:-4px;margin-bottom:8px}
+.ei-b{display:none;background:var(--sf2);border:1px solid var(--bd);border-top:none;border-radius:0 0 var(--r) var(--r);padding:12px 16px}
 .ei-b.open{display:block}
+.ei-w2{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--bd);font-size:13px}
+.ei-w2:last-child{border-bottom:none}
 .ei-w{padding:6px 0;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;font-size:12px}
 .ei-w:last-child{border-bottom:none}
 /* Encerrar */
@@ -447,7 +450,7 @@ function renderMovimento(){
     card.style.display='';
     list.innerHTML=today.incomes.map((inc,i)=>{
       const dT=(inc.linkedExpenses||[]).reduce((s,le)=>s+le.value,0);const liq=inc.value-dT;
-      const despHTML=(inc.linkedExpenses||[]).map(le=>`<div class="li-m"><span class="li-nm">${le.description}</span><span class="li-vl">${fmt(le.value)}</span>${isOpen?`<button class="btn-del" onclick="rmLE('${inc.id}','${le.id}')">&times;</button>`:''}</div>`).join('');
+      const despHTML=(inc.linkedExpenses||[]).map(le=>`<div class="ei-w2"><span class="li-nm">${le.description}</span><span class="li-vl">${fmt(le.value)}</span>${isOpen?`<button class="btn-del" onclick="rmLE('${inc.id}','${le.id}')">&times;</button>`:''}</div>`).join('');
       const formLE=isOpen?`<div class="row-m" style="margin-top:10px"><div class="field-m"><label>Descrição</label><input type="text" id="le-desc-${inc.id}" placeholder="Nova despesa"/></div><div class="field-m" style="max-width:130px"><label>Valor</label><input type="text" id="le-val-${inc.id}" class="mmask" placeholder="R$ 0,00"/></div><button class="btn-plus" onclick="addLE('${inc.id}')">+</button></div>`:'';
       return `<div class="ei-w"><div class="ei-h" onclick="toggleEI(${i})"><span class="ei-desc">${inc.description}</span><span class="ei-gross">${fmt(inc.value)}</span><span class="ei-liq ${liq>=0?'pos':'neg'}">${fmt(liq)}</span><span class="ei-chev open" id="ec-${i}">&#x2303;</span>${isOpen?`<button class="btn-del" onclick="event.stopPropagation();rmInc('${inc.id}')">&times;</button>`:''}</div><div class="ei-b open" id="eb-${i}">${despHTML||`<div style="font-size:12px;color:var(--tx3);padding:4px 0">Sem despesas vinculadas</div>`}${formLE}</div></div>`;
     }).join('');
