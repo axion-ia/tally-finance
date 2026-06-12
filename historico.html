@@ -283,8 +283,16 @@ tbody tr:hover td{border-bottom-color:transparent}
     </div>
     <div class="content">
       <div class="fbar">
-        <label>Filtrar por mês</label>
-        <input type="month" id="filtro-mes" onchange="renderHist()"/>
+        <label>Ano:</label>
+        <select class="fs" id="f-ano-hist" onchange="filtrarHist()" style="min-width:90px"></select>
+        <label>Mês:</label>
+        <select class="fs" id="filtro-mes" onchange="filtrarHist()" style="min-width:130px">
+          <option value="">Todos</option>
+          <option value="01">Janeiro</option><option value="02">Fevereiro</option><option value="03">Março</option>
+          <option value="04">Abril</option><option value="05">Maio</option><option value="06">Junho</option>
+          <option value="07">Julho</option><option value="08">Agosto</option><option value="09">Setembro</option>
+          <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+        </select>
         <button class="btn-g" onclick="limparFiltro()">Limpar</button>
       </div>
       <div id="hist-list"><div class="loading">Carregando...</div></div>
@@ -374,16 +382,21 @@ async function load(){
       movData.sort((a,b)=>b.date.localeCompare(a.date));
     }
   }catch(e){console.error(e);}
+  popularAnos();
   renderHist();
 }
 
+window.filtrarHist=()=>renderHist();
+
 window.renderHist=()=>{
   const el=document.getElementById('hist-list');
-  const filtro=document.getElementById('filtro-mes').value;
+  const ano=document.getElementById('f-ano-hist').value;
+  const mes=document.getElementById('filtro-mes').value;
   const today=getTodayStr();
 
   let dados=movData;
-  if(filtro) dados=movData.filter(d=>d.date.startsWith(filtro));
+  if(ano&&mes) dados=movData.filter(d=>d.date.startsWith(ano+'-'+mes));
+  else if(ano) dados=movData.filter(d=>d.date.startsWith(ano));
   if(!dados.length){el.innerHTML='<div class="empty">Nenhum movimento encontrado.</div>';return;}
 
   // Agrupar por mês
@@ -462,6 +475,15 @@ window.limparFiltro=()=>{
   document.getElementById('filtro-mes').value='';
   renderHist();
 };
+
+function popularAnos(){
+  const anos=[...new Set(movData.map(d=>d.date.slice(0,4)))].sort();
+  const anoAtual=String(new Date().getFullYear());
+  if(!anos.includes(anoAtual))anos.push(anoAtual);
+  const sel=document.getElementById('f-ano-hist');
+  sel.innerHTML=anos.map(a=>`<option value="${a}">${a}</option>`).join('');
+  sel.value=anoAtual;
+}
 
 window.reabrirDia=async(date,e)=>{
   if(e)e.preventDefault();
