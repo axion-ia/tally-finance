@@ -416,7 +416,7 @@ window.renderHist=()=>{
   el.innerHTML=Object.values(grupos).map((g,gi)=>{
     const diasHTML=g.days.map((day,di)=>{
       const uid2=`${gi}-${di}`;
-      const isFirst=gi===0&&di===0&&!filtro;
+      const isFirst=gi===0&&di===0&&!mes;
       const tE=day.incomes.reduce((s,i)=>s+i.value,0);
       const tL=day.incomes.reduce((s,i)=>s+i.linkedExpenses.reduce((x,le)=>x+le.value,0),0);
       const tD=day.dailyExpenses.reduce((s,e)=>s+e.value,0);
